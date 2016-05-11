@@ -52,8 +52,8 @@ setInterval(function(){
 	wfgetJson("https://pcci.attask-ondemand.com/attask/api/work", function(data){
 		var count = (data.data.length-1);
 		if(count > notifys){
-			pushNotification("You have "+count+" unseen notification.");
-			setUnread(count);
+			//pushNotification("You have "+count+" unseen notification.");
+			//setUnread(count);
 			notifys = count;
 		}
 	});

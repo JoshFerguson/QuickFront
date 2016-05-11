@@ -1,12 +1,11 @@
 {
-	"manifest_version": 2,
-	"name": "Workfront Nofify",
+	"manifest_version": 3,
+	"name": "QuickFront",
 	"description": "Easily get all your workfront notifications.",
-	"version": "1.0",
+	"version": "1.1",
 	"permissions": [
 		"storage",
 		"*://*/*",
-		"*",
 		"notifications"
 	],
 	"background": {

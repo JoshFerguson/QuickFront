@@ -10,6 +10,20 @@ body, section {			/* Change width and height to own preferences */
 	overflow-x: hidden;
 }
 
+#pageloading{
+	position: fixed;
+	bottom: 0px;
+	width: 500px;
+	height: 500px;
+	background: #ffffff;
+	z-index: 9999;
+	text-align: center;
+	display: none;
+}
+#pageloading .fa{
+	margin-top: 40%;
+	color: #f57f29;
+}
 
 
 /* Basic style tweaks */
