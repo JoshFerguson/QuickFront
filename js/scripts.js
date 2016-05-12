@@ -55,6 +55,18 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
+var apply_settings_chache=[];
+function apply_settings(pid){
+	if(!apply_settings_chache[pid]){
+		chrome.storage.sync.get(pid, function(val){
+			data = (val[pid]) ? val[pid] : false;
+			if(data){
+				//Set backgound color
+				(data.bgColor) ? $('[data-project="'+pid+'"]').css('background-color', data.bgColor) : false;
+			}
+		});
+	}
+}
  
 
 var wf = {
@@ -91,22 +103,37 @@ var populate = {
 		var wfcontent = $('#wfcontent');
 		wfcontent.empty();
 		wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate', function(data){
-			console.log(data)
-			$.each(data.data, function(key, task){
-				//console.log(task)
+			for(var i = 0; i<data.data.length; i++){
+				var task = data.data[i];
 				var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
 				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'" data-project="'+task.projectID+'">'+
 								'<strong>'+task.name+'</strong><br />'+
 								'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
 								'<i class="fa fa-cog item-settings"></i>'+
 							'</a>';
+							apply_settings(task.projectID);
 				wfcontent.append(html);
-				baCount=key;
-			});
+				baCount=i;
+			}
 		});
 	},
 	projects: function(){
-
+		var wfcontent = $('#wfcontent');
+		wfcontent.empty();
+		wf.get('project/search?map=true&id=55bf8a8d002fc00517c9c6f18c1bd353,56abcb65000278b5d860734409f80e2f,55a6b73600c3643fa3ba49aca724b21b,55a6b73600c3643fa3ba49aca724b21b', function(data){
+			for(var i = 0; i<data.data.length; i++){
+				var task = data.data[i];
+				var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
+				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'" data-project="'+task.ID+'">'+
+								'<strong>'+task.name+'</strong><br />'+
+								'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
+								'<i class="fa fa-cog item-settings"></i>'+
+							'</a>';
+							apply_settings(task.ID);
+				wfcontent.append(html);
+				baCount=i;
+			}
+		});
 	}
 }
 
@@ -158,10 +185,9 @@ $(document).ready(function(){
 			var optiins = {
 				bgColor : '#eeeeee'
 			};
-			console.log( val[edit_id] )
 
 			$('#cp3').colorpicker({
-	            color:  val[edit_id].color || optiins.bgColor,
+	            color: (val[edit_id]) ? val[edit_id].bgColor : optiins.bgColor,
 	            format: 'hex'
 	        });
 	        $('#ptitle').text( edit_id );
