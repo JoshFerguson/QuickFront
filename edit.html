@@ -27,33 +27,29 @@
 				<a class="navbar-brand" href="popup.html"><img src="img/logo.png" width="40px" /></a>
 			</div>
 			<div class="collapse navbar-collapse navbar-ex1-collapse">
+				<span id="ptitle"></span>
 			</div>
 		</nav>
 		
 		<section>
 			
-			<form name="prefform" id="prefform">
+			<form name="editProj" id="editProj">
 			<div class="bootstrap-iso">
 			 <div class="container-fluid">
 			  <div class="row">
 			   <div class="col-md-6 col-sm-6 col-xs-12">
 			     <div class="form-group ">
 			      <label class="control-label " for="name">
-			       First Name
+			       Project Color
 			      </label>
 			      <div class="input-group">
-			       <div class="input-group-addon">
-			        <i class="fa fa-user">
-			        </i>
-			       </div>
-			       <input class="form-control" id="fname" name="fname" type="text"/>
+			       <div id="cp3" class="input-group colorpicker-component">
+					    <input type="text" value="#00AABB" class="form-control" />
+					    <span class="input-group-addon"><i></i></span>
+					</div>
+			       
 			      </div>
-			     </div>
-			     
-			     <div id="cp3" class="input-group colorpicker-component">
-				    <input type="text" value="#00AABB" class="form-control" />
-				    <span class="input-group-addon"><i></i></span>
-				</div>
+
 				<br />
  
 			    <div id="advPref" class="collapse">

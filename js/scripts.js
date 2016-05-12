@@ -45,6 +45,16 @@ function wfgetdatacache(name){
 		return (typeof val[safeName] !== "undefined") ?  val[safeName] : false;
 	}); 
 }
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
  
 
 var wf = {
@@ -85,7 +95,7 @@ var populate = {
 			$.each(data.data, function(key, task){
 				//console.log(task)
 				var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
-				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'">'+
+				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'" data-project="'+task.projectID+'">'+
 								'<strong>'+task.name+'</strong><br />'+
 								'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
 								'<i class="fa fa-cog item-settings"></i>'+
@@ -142,18 +152,39 @@ $(document).ready(function(){
 		chrome.storage.sync.get("sendpushnotify", function(val){ preffForm.find('[name="sendpushnotify"]').prop('checked', val.sendpushnotify); console.log("sendpushnotify", val.sendpushnotify) }); 
 		chrome.storage.sync.get("refreshrate", function(val){ preffForm.find('[name="refreshrate"]').val(val.refreshrate || 20000); }); 
 	}
-	if(thispage()=="item-settings.html"){
-		$('#cp3').colorpicker({
-            color: '#AA3399',
-            format: 'rgba'
-        });
+	if(thispage()=="edit.html"){
+		var edit_id = getParameterByName('edit')
+		chrome.storage.sync.get(edit_id, function(val){
+			var optiins = {
+				bgColor : '#eeeeee'
+			};
+			console.log( val[edit_id] )
+
+			$('#cp3').colorpicker({
+	            color:  val[edit_id].color,
+	            format: 'hex'
+	        });
+	        $('#ptitle').text( edit_id );
+	        
+	        $( "#editProj" ).submit(function( event ) {
+		        event.preventDefault();
+		        var form = $(this);
+		        chrome.storage.sync.set({
+					[edit_id]: {
+						bgColor: $('#cp3 input').val()
+					},
+				});
+				swal("Saved", "Your preferences have been saved.", "success");
+		    });
+			
+		});
 	}
 	
 	
 	
 	$('body').on('click', '.item-settings', function(e){
 		e.preventDefault();
-		window.location = "item-settings.html";
+		window.location = "edit.html?edit="+$(this).parent().data('project')+"";
 	});
 	
 });
