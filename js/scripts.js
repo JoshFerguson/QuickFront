@@ -88,7 +88,7 @@ var populate = {
 				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'">'+
 								'<strong>'+task.name+'</strong><br />'+
 								'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
-								'<i class="fa fa-paint-brush colorPicker"></i>'+
+								'<i class="fa fa-cog item-settings"></i>'+
 							'</a>';
 				wfcontent.append(html);
 				baCount=key;
@@ -144,7 +144,7 @@ $(document).ready(function(){
 	}
 	
 	
-	$('body').on('click', '.colorPicker', function(e){
+	$('body').on('click', '.item-settings', function(e){
 		e.preventDefault();
 	});
 	

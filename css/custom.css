@@ -74,14 +74,14 @@ a:focus{
 	font-size: 11px;
 }
 
-.wf-list-item .colorPicker{
+.wf-list-item .item-settings{
 	float: right;
 	display: block;
 	margin-right: 10px;
 	margin-top: -10px;
 	opacity: 0.5;
 }
-.wf-list-item .colorPicker:hover{
+.wf-list-item .item-settings:hover{
 	opacity: 1;
 }
 
