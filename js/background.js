@@ -12,7 +12,7 @@ function setUnread(unreadItemCount) {
 
 function pushNotification(message) {
    var options = {
-      icon: "img/icon128.png"
+      icon: "img/logo-pushNotification.png"
   }
   if (!("Notification" in window)) {
     alert("This browser does not support desktop notification");
