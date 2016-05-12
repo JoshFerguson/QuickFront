@@ -62,7 +62,7 @@ function apply_settings(pid){
 			data = (val[pid]) ? val[pid] : false;
 			if(data){
 				//Set backgound color
-				(data.bgColor) ? $('[data-project="'+pid+'"]').css('background-color', data.bgColor) : false;
+				(data.bgColor) ? $('[data-project="'+pid+'"]').css('border-left-color', data.bgColor) : false;
 			}
 		});
 	}
@@ -70,6 +70,7 @@ function apply_settings(pid){
  
 
 var wf = {
+	myprojectsarray: [],
 	get: function(api, fn){
 		if(!wfgetdatacache(api)){
 			var wfdatacacheInt = setInterval(function(){ wfdatacacheTimer++; }, 1000);
@@ -102,33 +103,42 @@ var populate = {
 	mywork: function(){
 		var wfcontent = $('#wfcontent');
 		wfcontent.empty();
-		wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate', function(data){
+		wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate,color', function(data){
 			for(var i = 0; i<data.data.length; i++){
 				var task = data.data[i];
 				var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
-				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'" data-project="'+task.projectID+'">'+
-								'<strong>'+task.name+'</strong><br />'+
-								'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
-								'<i class="fa fa-cog item-settings"></i>'+
-							'</a>';
+				var html = '<div class="wf-list-item" data-project="'+task.projectID+'">'+
+								'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+
+								'<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="'+task.percentComplete+'" aria-valuemin="0" aria-valuemax="100" style="width:'+task.percentComplete+'%">'+task.percentComplete+'%</div></div>'+
+								'<div class="wf-item-icons">'+
+									'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
+									'<a target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+								'</div>'+
+							'</div>';
+							(task.color) ? chrome.storage.sync.set({ [task.projectID]: { bgColor: task.color} }) : false
 							apply_settings(task.projectID);
 				wfcontent.append(html);
 				baCount=i;
+				wf.myprojectsarray.push(task.projectID);
 			}
 		});
 	},
 	projects: function(){
 		var wfcontent = $('#wfcontent');
 		wfcontent.empty();
-		wf.get('project/search?map=true&id=55bf8a8d002fc00517c9c6f18c1bd353,56abcb65000278b5d860734409f80e2f,55a6b73600c3643fa3ba49aca724b21b,55a6b73600c3643fa3ba49aca724b21b', function(data){
+		var projs = (wf.myprojectsarray).join();
+		wf.get('project/search?map=true&id='+projs+'&fields=percentComplete,plannedCompletionDate', function(data){
 			for(var i = 0; i<data.data.length; i++){
 				var task = data.data[i];
 				var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
-				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'" data-project="'+task.ID+'">'+
-								'<strong>'+task.name+'</strong><br />'+
-								'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
-								'<i class="fa fa-cog item-settings"></i>'+
-							'</a>';
+				var html = '<div class="wf-list-item" data-project="'+task.ID+'">'+
+								'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+
+								'<div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="'+task.percentComplete+'" aria-valuemin="0" aria-valuemax="100" style="width:'+task.percentComplete+'%">'+task.percentComplete+'%</div></div>'+
+								'<div class="wf-item-icons">'+
+									'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
+									'<a target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+								'</div>'+
+							'</div>';
 							apply_settings(task.ID);
 				wfcontent.append(html);
 				baCount=i;
@@ -198,19 +208,13 @@ $(document).ready(function(){
 		        chrome.storage.sync.set({
 					[edit_id]: {
 						bgColor: $('#cp3 input').val()
-					},
+					}
 				});
 				swal("Saved", "Your preferences have been saved.", "success");
 		    });
 			
 		});
 	}
-	
-	
-	
-	$('body').on('click', '.item-settings', function(e){
-		e.preventDefault();
-		window.location = "edit.html?edit="+$(this).parent().data('project')+"";
-	});
+
 	
 });

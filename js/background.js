@@ -2,11 +2,11 @@ var ba = chrome.browserAction;
 var baCount=0;
 function setAllRead() {
   ba.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
-  ba.setBadgeText({text: ' '});   // <-- set text to '' to remove the badge
+  ba.setBadgeText({text: ''});
 }
 
 function setUnread(unreadItemCount) {
-  ba.setBadgeBackgroundColor({color: "#f79241"});
+  ba.setBadgeBackgroundColor({color: "#586578"});
   ba.setBadgeText({text: '' + unreadItemCount});
 }
 
