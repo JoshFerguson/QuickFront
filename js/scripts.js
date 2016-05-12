@@ -88,6 +88,7 @@ function pop(apac){
 			var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'">'+
 							'<strong>'+task.name+'</strong><br />'+
 							'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
+							'<i class="fa fa-paint-brush colorPicker"></i>'+
 						'</a>';
 			wfcontent.append(html);
 			baCount=key;
@@ -100,7 +101,7 @@ $(document).ready(function(){
 	
 	$(document).ajaxStart(function(){
 	    $('#pageloading').show();
-	}).ajaxEnd(function(){
+	}).ajaxStop(function(){
 		$('#pageloading').hide();
 	});
 	
@@ -121,8 +122,8 @@ $(document).ready(function(){
 				"lname": form.find('[name="lname"]').val(),
 				"email": form.find('[name="email"]').val(),
 				"password": form.find('[name="pass"]').val(),
-				"autosignin": form.find('[name="autosignin"]').val(),
-				"sendpushnotify": form.find('[name="sendpushnotify"]').val(),
+				"autosignin": form.find('[name="autosignin"]').prop('checked'),
+				"sendpushnotify": form.find('[name="sendpushnotify"]').prop('checked'),
 				"refreshrate": form.find('[name="refreshrate"]').val()
 			});
 			swal("Saved", "Your preferences have been saved.", "success");
@@ -132,10 +133,14 @@ $(document).ready(function(){
 		chrome.storage.sync.get("lname", function(val){ preffForm.find('[name="lname"]').val(val.lname); }); 
 		chrome.storage.sync.get("email", function(val){ preffForm.find('[name="email"]').val(val.email); }); 
 		chrome.storage.sync.get("password", function(val){ preffForm.find('[name="pass"]').val(val.password); }); 
-		chrome.storage.sync.get("autosignin", function(val){ preffForm.find('[name="autosignin"]').prop('checked', val.autosignin); }); 
-		chrome.storage.sync.get("sendpushnotify", function(val){ preffForm.find('[name="sendpushnotify"]').prop('checked', val.sendpushnotify); }); 
-		chrome.storage.sync.get("refreshrate", function(val){ preffForm.find('[name="refreshrate"]').val(val.refreshrate || 10000); }); 
+		chrome.storage.sync.get("autosignin", function(val){ preffForm.find('[name="autosignin"]').prop('checked', val.autosignin); console.log("autosignin", val.autosignin) }); 
+		chrome.storage.sync.get("sendpushnotify", function(val){ preffForm.find('[name="sendpushnotify"]').prop('checked', val.sendpushnotify); console.log("sendpushnotify", val.sendpushnotify) }); 
+		chrome.storage.sync.get("refreshrate", function(val){ preffForm.find('[name="refreshrate"]').val(val.refreshrate || 20000); }); 
 	}
 	
+	
+	$('body').on('click', '.colorPicker', function(e){
+		e.preventDefault();
+	});
 	
 });

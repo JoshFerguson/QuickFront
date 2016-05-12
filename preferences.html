@@ -91,31 +91,40 @@
 			      <div class=" ">
 			       <div class="checkbox">
 			        <label class="checkbox">
-			         <input name="autosignin" type="checkbox"/>
+			         <input name="autosignin" type="checkbox" value="true"/>
 			         Auto Sign-on
 			        </label>
 			       </div>
 			       <div class="checkbox">
 			        <label class="checkbox">
-			         <input name="sendpushnotify" type="checkbox"/>
+			         <input name="sendpushnotify" type="checkbox" value="true"/>
 			         Send Push Notification
 			        </label>
 			       </div>
 			      </div>
 			     </div>
-			     
-			     <div class="form-group ">
-			      <label class="control-label " for="name">
-			       Refresh Rate
-			      </label>
-			      <div class="input-group">
-			       <div class="input-group-addon">
-			        <i class="fa fa-refresh">
-			        </i>
-			       </div>
-			       <input class="form-control" id="refreshrate" name="refreshrate" type="text"/>
-			      </div>
-			     </div>
+			    <div class="form-group ">
+			    	<a href="#" data-toggle="collapse" data-target="#advPref">Advanced</a>
+			    </div>
+ 
+			    <div id="advPref" class="collapse">
+				
+				
+					<div class="form-group ">
+						<label class="control-label " for="refreshrate">
+							Refresh Rate
+						</label>
+						<div class="input-group">
+							<div class="input-group-addon">
+								<i class="fa fa-refresh"></i>
+							</div>
+							<input class="form-control" id="refreshrate" name="refreshrate" type="text"/>
+						</div>
+					</div>
+				
+				
+				</div>
+
 			     
 			     <div class="form-group">
 			      <div>
