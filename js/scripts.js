@@ -80,7 +80,7 @@ var populate = {
 	mywork: function(){
 		var wfcontent = $('#wfcontent');
 		wfcontent.empty();
-		wf.get('work', function(data){
+		wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate', function(data){
 			console.log(data)
 			$.each(data.data, function(key, task){
 				//console.log(task)
