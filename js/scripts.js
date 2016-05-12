@@ -161,7 +161,7 @@ $(document).ready(function(){
 			console.log( val[edit_id] )
 
 			$('#cp3').colorpicker({
-	            color:  val[edit_id].color,
+	            color:  val[edit_id].color || optiins.bgColor,
 	            format: 'hex'
 	        });
 	        $('#ptitle').text( edit_id );
