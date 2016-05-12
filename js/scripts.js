@@ -142,10 +142,18 @@ $(document).ready(function(){
 		chrome.storage.sync.get("sendpushnotify", function(val){ preffForm.find('[name="sendpushnotify"]').prop('checked', val.sendpushnotify); console.log("sendpushnotify", val.sendpushnotify) }); 
 		chrome.storage.sync.get("refreshrate", function(val){ preffForm.find('[name="refreshrate"]').val(val.refreshrate || 20000); }); 
 	}
+	if(thispage()=="item-settings.html"){
+		$('#cp3').colorpicker({
+            color: '#AA3399',
+            format: 'rgba'
+        });
+	}
+	
 	
 	
 	$('body').on('click', '.item-settings', function(e){
 		e.preventDefault();
+		window.location = "item-settings.html";
 	});
 	
 });
