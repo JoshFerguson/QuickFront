@@ -46,7 +46,7 @@ function wfgetJson(url, callback){
 
 //Check for notifys
 var notifys = 0;
-wfgetJson("https://pcci.attask-ondemand.com/attask/api/work", function(data){
+wfgetJson("https://pcci.attask-ondemand.com/attask/api/v5.0/work", function(data){
 	var count = (data.data.length-1);
 	if(count > notifys){
 		pushNotification("You have "+count+" unseen notification.");

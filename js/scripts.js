@@ -51,7 +51,7 @@ var wf = {
 	get: function(api, fn){
 		if(!wfgetdatacache(api)){
 			var wfdatacacheInt = setInterval(function(){ wfdatacacheTimer++; }, 1000);
-			$.getJSON( "https://pcci.attask-ondemand.com/attask/api/"+api, function( data ) { 
+			$.getJSON( "https://pcci.attask-ondemand.com/attask/api/v5.0/"+api, function( data ) { 
 				fn(data); 
 				wfdatacache(data, api, wfdatacacheInt);
 			}).error(function(){
@@ -76,25 +76,30 @@ var wf = {
 	}
 }
 
-
-function pop(apac){
-	var wfcontent = $('#wfcontent');
-	wfcontent.empty();
-	wf.get(apac, function(data){
-		console.log(data)
-		$.each(data.data, function(key, task){
-			//console.log(task)
-			var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
-			var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'">'+
-							'<strong>'+task.name+'</strong><br />'+
-							'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
-							'<i class="fa fa-paint-brush colorPicker"></i>'+
-						'</a>';
-			wfcontent.append(html);
-			baCount=key;
+var populate = {
+	mywork: function(){
+		var wfcontent = $('#wfcontent');
+		wfcontent.empty();
+		wf.get('work', function(data){
+			console.log(data)
+			$.each(data.data, function(key, task){
+				//console.log(task)
+				var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
+				var html = '<a class="wf-list-item" target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'">'+
+								'<strong>'+task.name+'</strong><br />'+
+								'<span class="wf-list-item-date">Due: '+dueON+'</span>'+
+								'<i class="fa fa-paint-brush colorPicker"></i>'+
+							'</a>';
+				wfcontent.append(html);
+				baCount=key;
+			});
 		});
-	});
+	},
+	projects: function(){
+
+	}
 }
+
 
 
 $(document).ready(function(){
@@ -105,13 +110,13 @@ $(document).ready(function(){
 		$('#pageloading').hide();
 	});
 	
-	pop('work');
+	populate.mywork();
 	
 	$('[data-load]').on('click', function(){
 		$('[data-load]').parent().removeClass('active');
 		$(this).parent().addClass('active');
 		var apac = $(this).data('load');
-		pop(apac);
+		populate[apac]();
 	});
 	if(thispage()=="preferences.html"){
 		$( "#prefform" ).submit(function( event ) {
