@@ -55,7 +55,8 @@ a:focus{
 	border-left: 4px solid transparent;
 	border-radius: 0px;
 	color: #444444;
-	transition: all 0.5s ease;
+	transition: all 0.7s ease;
+	position: relative;
 }
 .wf-list-item:hover{
 	text-decoration: none;
@@ -86,6 +87,24 @@ a:focus{
 	white-space: normal;
 }
 
+.tabConfirm{
+	display: none;
+}
+
+.wf-tab-slide-right{
+	right: -90%;
+}
+
+.wf-tab-slide-right .tabConfirm{
+	display: block;
+    position: absolute;
+    height: 100%;
+    width: 92%;
+    top: 0px;
+    left: -450px;
+    text-align: left;
+}
+
 .wf-item-icons i{
 	float: right;
 	margin: 0px 3px;
@@ -111,9 +130,29 @@ a:focus{
 	opacity: 0;
 }
 
-.wf_timekeeper_pulse{
-	color: #f1923b;
-	opacity: 1;
+.wf_timekeeper_pulse {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {  
+  50% { color: #f1923b; }
+}
+
+.timeKeeper-time{
+	font-size: 11px;
+	vertical-align: text-top;	
+	opacity: 0.5;
+}
+
+.tabConfirmTime{
+	font-size: 30px;
+	display: inline-block;
+    margin: 19px;
+}
+
+.tabConfirm button{
+	margin: 0px 8px;
+    margin-top: -15px;
 }
 
 /* Scroll Bar */

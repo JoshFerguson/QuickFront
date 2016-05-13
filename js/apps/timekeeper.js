@@ -7,35 +7,31 @@ $(document).ready(function(){
 	});
 });
 
-var timers = [];
-String.prototype.toHHMMSS = function () {
-    var sec_num = parseInt(this, 10); // don't forget the second param
-    var hours   = Math.floor(sec_num / 3600);
-    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+function tabConfirm(tab, html){
+	$(tab).closest('.wf-list-item').addClass('wf-tab-slide-right');
+	$(tab).closest('.wf-list-item').find('.tabConfirm').html(html);
+}
 
-    if (hours   < 10) {hours   = "0"+hours;}
-    if (minutes < 10) {minutes = "0"+minutes;}
-    if (seconds < 10) {seconds = "0"+seconds;}
-    return hours+':'+minutes+':'+seconds;
+function timekeeperConfirm(_id, time){
+	var tab = $('[data-timekeeper="'+_id+'"]');
+	var html = '<span class="tabConfirmTime">'+time+'</span><button type="button" class="btn-close-confirm btn btn-success">Confirm</button><button type="button" class="btn-close-confirm btn btn-default">Discard</button>';
+	tabConfirm(tab, html);
+	$('body').on('click', '.btn-close-confirm', function(){
+		$(this).closest('.wf-list-item').removeClass('wf-tab-slide-right');
+	});
 }
 function timekeeper(_kind, _id, action, that){
 	var name = "wf_timekeeper_"+_id;
 	if(action){
-		$.inArray(name,timers) ? timers.push(name) : false;
-		var ticker = 0;
-		localStorage.setItem(name, ticker);
-		timers[name] = setInterval(function(){
-			ticker++
-			that.toggleClass('wf_timekeeper_pulse')
-			localStorage.setItem(name, ticker);
-		}, 1000);
+		localStorage.setItem(name, new Date());
+		that.addClass('wf_timekeeper_pulse')
 	}else{
-		clearInterval(timers[name]);
+		var date1 = new Date(localStorage.getItem(name));
+		var date2 = new Date();
+		var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+		var elapsed = (timeDiff/3600000).toFixed(2);
 		that.removeClass('wf_timekeeper_pulse')
-		var time = localStorage.getItem(name);
+		timekeeperConfirm(_id, elapsed);
 		localStorage.removeItem(name);
-		console.log(name, time.toHHMMSS())
-		//that.next('.timeKeeper-time').text( time.toHHMMSS() );
 	}
-}
+}	

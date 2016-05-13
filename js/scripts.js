@@ -118,7 +118,8 @@ chrome.storage.sync.get(null, function(storage) {
 									'<div class="wf-item-icons">'+
 										'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
 										'<a target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
-										'<i class="fa fa-clock-o timeKeeper" data-id="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
+										'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
+										'<div class="tabConfirm"></div>'+
 									'</div>'+
 								'</div>';
 								(task.color) ? chrome.storage.sync.set({ [task.projectID]: { bgColor: task.color} }) : false
@@ -144,6 +145,7 @@ chrome.storage.sync.get(null, function(storage) {
 										'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
 										'<a target="_blank" href="https://pcci.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
 										'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
+										'<div class="tabConfirm"></div>'+
 									'</div>'+
 								'</div>';
 								apply_settings(task.ID);
