@@ -1,6 +1,7 @@
 var ba = chrome.browserAction;
 var baCount=0;
 var storage;
+var apiPath = "https://pcci.attask-ondemand.com/attask/api/v5.0/":
 function setAllRead() {
   ba.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
   ba.setBadgeText({text: ''});
@@ -44,32 +45,42 @@ function wfgetJson(url, callback){
 	};
 	xmlhttp.send(null);
 }
-
+var allNots=[];
 function getNotifus(){
 	//Check for notifys
 	var notifys = 0;
-	wfgetJson("https://pcci.attask-ondemand.com/attask/api/v5.0/notifications?fields=note", function(data){
-		var count = (data.data.length-1);
-		if(count > notifys){
-			pushNotification("You have "+count+" unseen notification.");
-			setUnread(count);
-			notifys = count;
+	wfgetJson(apiPath+"notifications?fields=note", function(data){
+		var data = data.data;
+		for(var i=0; i<data.length; i++){
+			if(data[i].note){
+				console.log(data[i].note.ID, i)
+				allNots.push(data[i].note.ID);
+			}
 		}
+		var allNots = allNots.slice(0, 50);
+		var notes = allNots.join();
+		wfgetJson(apiPath+"note/"+notes+"?fields=*", function(data){
+			var count = (data.data.length-1);
+			if(count > notifys){
+				pushNotification("You have "+count+" unseen notification.");
+				setUnread(count);
+				notifys = count;
+			}
+		});
 	});
 }
 
 chrome.storage.sync.get(null, function(storage) {
 
 	if(storage.autosignin){
-		console.log(storage.username, storage.password)
-		$.post( "https://pcci.attask-ondemand.com/attask/api/v5.0/login", { username: storage.username, password: storage.password } ).done(function( data ) {
+		$.post( apiPath+"login", { username: storage.username, password: storage.password } ).done(function( data ) {
 			
 			pushNotification("You have been automatedly logged into workfront.");
 			
-			(storage.sendpushnotify) ?  getNotifus() : false;
+			//(storage.sendpushnotify) ?  getNotifus() : false;
 			
 			if(storage.refreshrate){
-				setInterval(function(){ getNotifus() }, parseInt(val.refreshrate));
+				//setInterval(function(){ getNotifus() }, parseInt(val.refreshrate));
 			}
 			
 		});

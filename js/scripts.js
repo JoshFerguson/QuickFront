@@ -113,11 +113,12 @@ chrome.storage.sync.get(null, function(storage) {
 					var task = data.data[i];
 					var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
 					var pbar = progressBar(task.percentComplete);
-					var html = '<div class="wf-list-item" data-project="'+task.projectID+'">'+
+					var html = '<div class="wf-list-item" data-type="task" data-project="'+task.projectID+'">'+
 									'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 									'<div class="wf-item-icons">'+
 										'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
 										'<a target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+										'<i class="fa fa-clock-o timeKeeper" data-id="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 									'</div>'+
 								'</div>';
 								(task.color) ? chrome.storage.sync.set({ [task.projectID]: { bgColor: task.color} }) : false
@@ -137,17 +138,44 @@ chrome.storage.sync.get(null, function(storage) {
 					var task = data.data[i];
 					var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
 					var pbar = progressBar(task.percentComplete);
-					var html = '<div class="wf-list-item" data-project="'+task.ID+'">'+
+					var html = '<div class="wf-list-item" data-type="project" data-project="'+task.ID+'">'+
 									'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 									'<div class="wf-item-icons">'+
 										'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
-										'<a target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+										'<a target="_blank" href="https://pcci.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+										'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 									'</div>'+
 								'</div>';
 								apply_settings(task.ID);
 					wfcontent.append(html);
 					baCount=i;
 				}
+			});
+		},
+		notifications: function(){
+			//Check for notifys
+			wf.get('notifications?fields=note', function(data){
+				var allNots = [];
+/*
+				var notifys = 0;
+				var data = data.data;
+				for(var i=0; i<data.length; i++){
+					if(data[i].note){ allNots.push(data[i].note.ID); }
+				}
+				allNots = allNots.slice(0, 50);
+				allNots = allNots.join();
+*/
+				console.log(allNots)
+/*
+				wf.get('note/'+notes+'?fields=*', function(data){
+					var count = (data.data.length-1);
+					if(count > notifys){
+						alert('')
+						setUnread(count);
+						notifys = count;
+					}
+				});
+*/
 			});
 		}
 	}
