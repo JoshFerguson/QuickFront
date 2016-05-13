@@ -99,6 +99,16 @@ a:focus{
 
 .progress{
 	box-shadow: none;
+	background: transparent;
+	border: 1px solid white;
+}
+.progress-bar{
+	background-color: #f57f29;
+	border: none;
+}
+
+.hide_opacity{
+	opacity: 0;
 }
 
 /* Scroll Bar */

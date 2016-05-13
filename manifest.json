@@ -9,7 +9,7 @@
 		"notifications"
 	],
 	"background": {
-		"scripts": ["js/background.js"]
+		"scripts": ["js/jquery-2.0.3.min.js", "js/background.js"]
 	},
 	"icons": { 
 		"16": "img/icon16.png",

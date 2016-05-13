@@ -1,5 +1,6 @@
 var ba = chrome.browserAction;
 var baCount=0;
+var storage;
 function setAllRead() {
   ba.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
   ba.setBadgeText({text: ''});
@@ -44,13 +45,37 @@ function wfgetJson(url, callback){
 	xmlhttp.send(null);
 }
 
-//Check for notifys
-var notifys = 0;
-wfgetJson("https://pcci.attask-ondemand.com/attask/api/v5.0/work", function(data){
-	var count = (data.data.length-1);
-	if(count > notifys){
-		pushNotification("You have "+count+" unseen notification.");
-		setUnread(count);
-		notifys = count;
+function getNotifus(){
+	//Check for notifys
+	var notifys = 0;
+	wfgetJson("https://pcci.attask-ondemand.com/attask/api/v5.0/notifications?fields=note", function(data){
+		var count = (data.data.length-1);
+		if(count > notifys){
+			pushNotification("You have "+count+" unseen notification.");
+			setUnread(count);
+			notifys = count;
+		}
+	});
+}
+
+chrome.storage.sync.get(null, function(storage) {
+
+	if(storage.autosignin){
+		console.log(storage.username, storage.password)
+		$.post( "https://pcci.attask-ondemand.com/attask/api/v5.0/login", { username: storage.username, password: storage.password } ).done(function( data ) {
+			
+			pushNotification("You have been automatedly logged into workfront.");
+			
+			(storage.sendpushnotify) ?  getNotifus() : false;
+			
+			if(storage.refreshrate){
+				setInterval(function(){ getNotifus() }, parseInt(val.refreshrate));
+			}
+			
+		});
 	}
+	
 });
+
+
+
