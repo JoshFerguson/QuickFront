@@ -182,7 +182,6 @@ chrome.storage.sync.get(null, function(storage) {
 				}
 				var ids=allNots.join();
 				wf.get('note/?fields=*&id='+ids, function(data){
-					console.log(data)
 					for(var i = 0; i<data.data.length; i++){
 						var note = data.data[i];
 						if(note.topNoteObjCode=="PROJ"){ type='project'; }
