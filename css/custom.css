@@ -72,10 +72,15 @@ a:focus{
 	display: inline-block;
 }
 
+
 .wf-list-item-date{
 	font-size: 11px;
 	float: right;
 	padding-top: 3px;
+}
+
+.wf-notes .wf-list-item-date{
+	float: left;
 }
 
 .wf-item-icons{
@@ -89,6 +94,7 @@ a:focus{
 
 .tabConfirm{
 	display: none;
+	transition: all 1s ease;
 }
 
 .wf-tab-slide-right{
@@ -98,11 +104,12 @@ a:focus{
 .wf-tab-slide-right .tabConfirm{
 	display: block;
     position: absolute;
-    height: 100%;
+    height: 101%;
     width: 92%;
     top: 0px;
     left: -450px;
     text-align: left;
+    border-bottom: 1px solid #e7e7e7;
 }
 
 .wf-item-icons i{
@@ -148,6 +155,8 @@ a:focus{
 	font-size: 30px;
 	display: inline-block;
     margin: 19px;
+    width: 100px;
+    text-align: center;
 }
 
 .tabConfirm button{

@@ -73,6 +73,14 @@ chrome.storage.sync.get(null, function(storage) {
 		var h = p == 0 ? 'hide_opacity' : '';
 		return '<div class="progress '+h+'"><div class="progress-bar" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100" style="width:'+p+'%">'+p+'%</div></div>';
 	}
+	
+	function checkTimeInProgress(){
+		$.each(localStorage, function(key, val){
+			if( key.indexOf('wf_timekeeper_') > -1 ){
+				$('[data-timekeeper="'+key.replace('wf_timekeeper_','')+'"]').addClass('wf_timekeeper_pulse');
+			}
+		});
+	}
 	 
 	var wf = {
 		myprojectsarray: [],
@@ -80,7 +88,7 @@ chrome.storage.sync.get(null, function(storage) {
 			if(!wfgetdatacache(api)){
 				var wfdatacacheInt = setInterval(function(){ wfdatacacheTimer++; }, 1000);
 				$.getJSON( "https://pcci.attask-ondemand.com/attask/api/v5.0/"+api, function( data ) { 
-					fn(data); 
+					jQuery.isFunction(fn) ? fn(data) : false
 					wfdatacache(data, api, wfdatacacheInt);
 				}).error(function(){
 					swal({
@@ -94,12 +102,20 @@ chrome.storage.sync.get(null, function(storage) {
 					});
 				});
 			}else{
-				fn(wfgetdatacache(api)); 
+				jQuery.isFunction(fn) ? fn(wfgetdatacache(api)) : false
 			}
 		},
 		tasks: function(api, fn){
 			this.get('task/'+api, function(){
 				fn()
+			});
+		},
+		time: function(taskID, time, kind){
+			if(kind=="task"){ kind == 'taskID'; }
+			if(kind=="project"){ kind == 'projectID'; }
+			if(kind=="Issue"){ kind == 'opTaskID'; }
+			wf.get('hour/?updates={"'+kind+'":"'+taskID+'","hours":"'+time+'","status":"SUB"}&sessionID='+storage.sessionID+'&method=post', function(){
+				swal("Done", "Your time has been logged", "success");
 			});
 		}
 	}
@@ -108,10 +124,10 @@ chrome.storage.sync.get(null, function(storage) {
 		mywork: function(){
 			var wfcontent = $('#wfcontent');
 			wfcontent.empty();
-			wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate,color', function(data){
+			wf.get('work?fields=name,projectID,assignedToID,percentComplete,dueDate,color', function(data){
 				for(var i = 0; i<data.data.length; i++){
 					var task = data.data[i];
-					var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
+					var dueON = $.format.date(task.dueDate, "MMMM d, yyyy");
 					var pbar = progressBar(task.percentComplete);
 					var html = '<div class="wf-list-item" data-type="task" data-project="'+task.projectID+'">'+
 									'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
@@ -155,29 +171,29 @@ chrome.storage.sync.get(null, function(storage) {
 			});
 		},
 		notifications: function(){
-			//Check for notifys
-			wf.get('notifications?fields=note', function(data){
+			var wfcontent = $('#wfcontent');
+			wfcontent.empty();
+			wf.get('notifications?fields=note,acknowledgementID', function(data){
 				var allNots = [];
-/*
-				var notifys = 0;
-				var data = data.data;
-				for(var i=0; i<data.length; i++){
-					if(data[i].note){ allNots.push(data[i].note.ID); }
+				for(var i = 0; i<50; i++){
+					if(data.data[i].note && !data.data[i].acknowledgementID){
+						allNots.push(data.data[i].note.ID);
+					}
 				}
-				allNots = allNots.slice(0, 50);
-				allNots = allNots.join();
-*/
-				console.log(allNots)
-/*
-				wf.get('note/'+notes+'?fields=*', function(data){
-					var count = (data.data.length-1);
-					if(count > notifys){
-						alert('')
-						setUnread(count);
-						notifys = count;
+				var ids=allNots.join();
+				wf.get('note/?fields=*&id='+ids, function(data){
+					console.log(data)
+					for(var i = 0; i<data.data.length; i++){
+						var note = data.data[i];
+						if(note.topNoteObjCode=="PROJ"){ type='project'; }
+						var date = $.format.date(note.entryDate, "MMMM d, yyyy");
+						var html = '<a target="_blank" href="https://pcci.attask-ondemand.com/project/view?ID='+note.projectID+'" class="wf-list-item wf-notes" data-type="note" data-project="'+note.ID+'">'+
+										'<p>'+note.noteText+'</p><span class="wf-list-item-date">'+date+'</span>'+
+									'</a>';
+						wfcontent.append(html);
+						baCount=i;
 					}
 				});
-*/
 			});
 		}
 	}
@@ -192,13 +208,15 @@ chrome.storage.sync.get(null, function(storage) {
 			$('#pageloading').hide();
 		});
 		
-		populate.mywork();
+		populate.notifications();
+		setTimeout(function(){ checkTimeInProgress(); }, 1000);
 		
 		$('[data-load]').on('click', function(){
 			$('[data-load]').parent().removeClass('active');
 			$(this).parent().addClass('active');
 			var apac = $(this).data('load');
 			populate[apac]();
+			setTimeout(function(){ checkTimeInProgress(); }, 1000);
 		});
 		if(thispage()=="preferences.html"){
 			$( "#prefform" ).submit(function( event ) {
@@ -223,7 +241,7 @@ chrome.storage.sync.get(null, function(storage) {
 			preffForm.find('[name="pass"]').val(storage.password);
 			preffForm.find('[name="autosignin"]').prop('checked', storage.autosignin);
 			preffForm.find('[name="sendpushnotify"]').prop('checked', storage.sendpushnotify);
-			preffForm.find('[name="refreshrate"]').val(storage.refreshrate || 20000); 
+			preffForm.find('[name="refreshrate"]').val(storage.refreshrate || 60000); 
 			
 		}
 		if(thispage()=="edit.html"){
@@ -257,3 +275,4 @@ chrome.storage.sync.get(null, function(storage) {
 
 
 });//end get local storage
+
