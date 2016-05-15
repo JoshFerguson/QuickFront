@@ -1,5 +1,5 @@
 chrome.storage.sync.get(null, function(storage) {
-	var apiPath = "https://pcci.attask-ondemand.com/attask/api/v5.0/";
+	var apiPath = "https://"+storage.wfdomain+".attask-ondemand.com/attask/api/v5.0/";
 	$(document).ready(function(){
 		$('body').on('click', '.timeKeeper', function(){
 			var item = $(this).closest('.wf-list-item');
@@ -44,10 +44,11 @@ chrome.storage.sync.get(null, function(storage) {
 		var name = "wf_timekeeper_"+_id;
 		if(action){
 			localStorage.setItem(name, new Date());
-			that.addClass('wf_timekeeper_pulse')
+			that.addClass('wf_timekeeper_pulse');
 		}else{
 			var elapsed = wfTime(name);
-			that.removeClass('wf_timekeeper_pulse')
+			that.removeClass('wf_timekeeper_pulse');
+			that.next('.timeKeeper-time').text('');
 			timekeeperConfirm(_id, _kind, elapsed);
 			localStorage.removeItem(name);
 		}

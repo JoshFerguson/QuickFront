@@ -74,12 +74,42 @@ chrome.storage.sync.get(null, function(storage) {
 		return '<div class="progress '+h+'"><div class="progress-bar" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100" style="width:'+p+'%">'+p+'%</div></div>';
 	}
 	
+	
+	function msToTime(s) {
+	
+	  function addZ(n) {
+	    return (n<10? '0':'') + n;
+	  }
+	
+	  var ms = s % 1000;
+	  s = (s - ms) / 1000;
+	  var secs = s % 60;
+	  s = (s - secs) / 60;
+	  var mins = s % 60;
+	  var hrs = (s - mins) / 60;
+	
+	  return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs);
+	}
+	
 	function checkTimeInProgress(){
 		$.each(localStorage, function(key, val){
 			if( key.indexOf('wf_timekeeper_') > -1 ){
 				$('[data-timekeeper="'+key.replace('wf_timekeeper_','')+'"]').addClass('wf_timekeeper_pulse');
 			}
 		});
+		timeInProgressTicker();
+		$('body').on('click', '.timeKeeper', function(){ timeInProgressTicker(); });
+	}
+	function timeInProgressTicker(){
+		setInterval(function(){
+			$.each(localStorage, function(key, val){
+				if( key.indexOf('wf_timekeeper_') > -1 ){
+					var date1 = new Date(localStorage.getItem(key)), date2 = new Date();
+					var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+					$('[data-timekeeper="'+key.replace('wf_timekeeper_','')+'"]').next('.timeKeeper-time').text( msToTime(timeDiff) )
+				}
+			});
+		}, 1000)
 	}
 	 
 	var wf = {
@@ -87,7 +117,7 @@ chrome.storage.sync.get(null, function(storage) {
 		get: function(api, fn){
 			if(!wfgetdatacache(api)){
 				var wfdatacacheInt = setInterval(function(){ wfdatacacheTimer++; }, 1000);
-				$.getJSON( "https://pcci.attask-ondemand.com/attask/api/v5.0/"+api, function( data ) { 
+				$.getJSON( "https://"+storage.wfdomain+".attask-ondemand.com/attask/api/v5.0/"+api, function( data ) { 
 					jQuery.isFunction(fn) ? fn(data) : false
 					wfdatacache(data, api, wfdatacacheInt);
 				}).error(function(){
@@ -121,7 +151,7 @@ chrome.storage.sync.get(null, function(storage) {
 	}
 	
 	var populate = {
-		mywork: function(){
+		mywork: function(fn){
 			var wfcontent = $('#wfcontent');
 			wfcontent.empty();
 			wf.get('work?fields=name,projectID,assignedToID,percentComplete,dueDate,color', function(data){
@@ -133,7 +163,7 @@ chrome.storage.sync.get(null, function(storage) {
 									'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 									'<div class="wf-item-icons">'+
 										'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
-										'<a target="_blank" href="https://pcci.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+										'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
 										'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 										'<div class="tabConfirm"></div>'+
 									'</div>'+
@@ -144,9 +174,10 @@ chrome.storage.sync.get(null, function(storage) {
 					baCount=i;
 					wf.myprojectsarray.push(task.projectID);
 				}
+				jQuery.isFunction(fn) ? fn(data) : false
 			});
 		},
-		projects: function(){
+		projects: function(fn){
 			var wfcontent = $('#wfcontent');
 			wfcontent.empty();
 			var projs = (wf.myprojectsarray).join();
@@ -159,7 +190,7 @@ chrome.storage.sync.get(null, function(storage) {
 									'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 									'<div class="wf-item-icons">'+
 										'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
-										'<a target="_blank" href="https://pcci.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+										'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
 										'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 										'<div class="tabConfirm"></div>'+
 									'</div>'+
@@ -168,9 +199,10 @@ chrome.storage.sync.get(null, function(storage) {
 					wfcontent.append(html);
 					baCount=i;
 				}
+				jQuery.isFunction(fn) ? fn(data) : false
 			});
 		},
-		notifications: function(){
+		notifications: function(fn){
 			var wfcontent = $('#wfcontent');
 			wfcontent.empty();
 			wf.get('notifications?fields=note,acknowledgementID', function(data){
@@ -186,37 +218,20 @@ chrome.storage.sync.get(null, function(storage) {
 						var note = data.data[i];
 						if(note.topNoteObjCode=="PROJ"){ type='project'; }
 						var date = $.format.date(note.entryDate, "MMMM d, yyyy");
-						var html = '<a target="_blank" href="https://pcci.attask-ondemand.com/project/view?ID='+note.projectID+'" class="wf-list-item wf-notes" data-type="note" data-project="'+note.ID+'">'+
+						var html = '<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+note.projectID+'" class="wf-list-item wf-notes" data-type="note" data-project="'+note.ID+'">'+
 										'<p>'+note.noteText+'</p><span class="wf-list-item-date">'+date+'</span>'+
 									'</a>';
 						wfcontent.append(html);
 						baCount=i;
+						setUnread(i);
 					}
 				});
+				jQuery.isFunction(fn) ? fn(data) : false
 			});
 		}
 	}
 	
-	
-	
-	$(document).ready(function(){
-		
-		$(document).ajaxStart(function(){
-		    $('#pageloading').show();
-		}).ajaxStop(function(){
-			$('#pageloading').hide();
-		});
-		
-		populate.notifications();
-		setTimeout(function(){ checkTimeInProgress(); }, 1000);
-		
-		$('[data-load]').on('click', function(){
-			$('[data-load]').parent().removeClass('active');
-			$(this).parent().addClass('active');
-			var apac = $(this).data('load');
-			populate[apac]();
-			setTimeout(function(){ checkTimeInProgress(); }, 1000);
-		});
+	function pageActions(){
 		if(thispage()=="preferences.html"){
 			$( "#prefform" ).submit(function( event ) {
 				event.preventDefault();
@@ -228,6 +243,7 @@ chrome.storage.sync.get(null, function(storage) {
 					"password": form.find('[name="pass"]').val(),
 					"autosignin": form.find('[name="autosignin"]').prop('checked'),
 					"sendpushnotify": form.find('[name="sendpushnotify"]').prop('checked'),
+					"wfdomain": form.find('[name="wfdomain"]').val(),
 					"refreshrate": form.find('[name="refreshrate"]').val()
 				});
 				swal("Saved", "Your preferences have been saved.", "success");
@@ -238,9 +254,15 @@ chrome.storage.sync.get(null, function(storage) {
 			preffForm.find('[name="lname"]').val(storage.lname); 
 			preffForm.find('[name="username"]').val(storage.username); 
 			preffForm.find('[name="pass"]').val(storage.password);
+			preffForm.find('[name="wfdomain"]').val(storage.wfdomain);
 			preffForm.find('[name="autosignin"]').prop('checked', storage.autosignin);
 			preffForm.find('[name="sendpushnotify"]').prop('checked', storage.sendpushnotify);
 			preffForm.find('[name="refreshrate"]').val(storage.refreshrate || 60000); 
+			
+			$('#resetConfig').on('click', function(){
+				chrome.storage.sync.set({"fname": null,"lname": null,"username": null,"password": null,"wfdomain": null,"refreshrate": null,"isConfiged": null});
+				window.location="welcome.html";
+			});
 			
 		}
 		if(thispage()=="edit.html"){
@@ -269,9 +291,35 @@ chrome.storage.sync.get(null, function(storage) {
 				
 			});
 		}
-
+	}
+	
+	
+	
+	$(document).ready(function(){
+		
+		if(!storage.isConfiged){
+			window.location = "welcome.html";
+		}else{
+			$(document).ajaxStart(function(){
+			    $('#pageloading').show();
+			}).ajaxStop(function(){
+				$('#pageloading').hide();
+			});
+			
+			populate.notifications(function(){
+				checkTimeInProgress();
+			});
+			
+			$('[data-load]').on('click', function(){
+				$('[data-load]').parent().removeClass('active');
+				$(this).parent().addClass('active');
+				var apac = $(this).data('load');
+				populate[apac](function(){
+					checkTimeInProgress();
+				});
+			});
+		}//Is isConfiged
+		pageActions();
 	});
 
-
 });//end get local storage
-

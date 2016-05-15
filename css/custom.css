@@ -4,11 +4,18 @@
  *	
  */
 
-body, section {			/* Change width and height to own preferences */
+body{
+	width: 500px;
+	height: 560px;
+	overflow-x: hidden;
+}
+
+section {			/* Change width and height to own preferences */
 	width: 500px;
 	height: 500px;
 	overflow-x: hidden;
 }
+
 
 #pageloading{
 	position: fixed;
@@ -28,11 +35,21 @@ body, section {			/* Change width and height to own preferences */
 
 /* Basic style tweaks */
 section { }
-.navbar { margin-bottom: 2px; }
+.navbar { margin-bottom: 2px; border-radius: 0px; }
 
 .navbar-brand{
 	padding: 5px 15px;
 }
+
+/*
+.navbar-nav li a span{
+	display: none;
+}
+
+.navbar-nav li.active a span{
+	display: inline;
+}
+*/
 
 a:focus{
 	outline: none;
@@ -149,6 +166,8 @@ a:focus{
 	font-size: 11px;
 	vertical-align: text-top;	
 	opacity: 0.5;
+	display: inline-block;
+    margin-top: -2px;
 }
 
 .tabConfirmTime{
