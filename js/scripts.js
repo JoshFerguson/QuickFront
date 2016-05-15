@@ -294,6 +294,19 @@ chrome.storage.sync.get(null, function(storage) {
 	}
 	
 	
+	function ondrag(elem, fn){
+		var isDragging = false;
+		elem.mousedown(function() {
+		    isDragging = false;
+		}).mousemove(function() {
+		    isDragging = true;
+		 }).mouseup(function() {
+		    var wasDragging = isDragging;
+		    isDragging = false;
+		    if (wasDragging) { fn(); }
+		});
+	}
+	
 	
 	$(document).ready(function(){
 		
@@ -320,6 +333,12 @@ chrome.storage.sync.get(null, function(storage) {
 			});
 		}//Is isConfiged
 		pageActions();
+		$('.navbar').dblclick(function(){
+			var w=$(document).width(),h=$(document).height();
+			var sw = screen.width - 530;
+			window.open('chrome-extension://nfinbnedefiaammkllfcmcecjbhjobii/popup.html','Quick Front', 'width='+w+', height='+h+' top=75, left='+sw);
+			return false;
+		});
 	});
 
 });//end get local storage
