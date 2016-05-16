@@ -15,6 +15,10 @@ $(document).ready(function(){
 		});
 		var apiPath = "https://"+form.find('[name="wfdomain"]').val()+".attask-ondemand.com/attask/api/v5.0/";
 		$.post( apiPath+"login", { username: form.find('[name="username"]').val(), password: form.find('[name="password"]').val() } ).done(function( data ) {
+			chrome.storage.sync.set({
+				'sessionID': data.data.sessionID,
+				'userID': data.data.userID
+			});
 			window.location = "popup.html";
 		});
 	});

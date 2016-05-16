@@ -202,6 +202,27 @@ chrome.storage.sync.get(null, function(storage) {
 				jQuery.isFunction(fn) ? fn(data) : false
 			});
 		},
+		approvals: function(fn){
+			var wfcontent = $('#wfcontent');
+			wfcontent.empty();
+			var projs = (wf.myprojectsarray).join();
+			wf.get('AWAPVL/search?fields=*&submittedByID='+storage.userID, function(data){
+				for(var i = 0; i<data.data.length; i++){
+					var task = data.data[i];
+					var dueON = $.format.date(task.entryDate, "MMMM d, yyyy");
+					var html = '<div class="wf-list-item" data-type="approval" data-project="'+task.projectID+'">'+
+									'<strong>'+task.ID+'</strong><span class="wf-list-item-date">Opened: '+dueON+'</span>'+
+									'<div class="wf-item-icons">'+
+										'<div class="tabConfirm"></div>'+
+									'</div>'+
+								'</div>';
+								apply_settings(task.projectID);
+					wfcontent.append(html);
+					baCount=i;
+				}
+				jQuery.isFunction(fn) ? fn(data) : false
+			});
+		},
 		notifications: function(fn){
 			var wfcontent = $('#wfcontent');
 			wfcontent.empty();

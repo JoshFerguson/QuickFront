@@ -69,7 +69,10 @@ chrome.storage.sync.get(null, function(storage) {
 		if(storage.autosignin){
 			$.post( apiPath+"login", { username: storage.username, password: storage.password } ).done(function( data ) {
 				
-				chrome.storage.sync.set({'sessionID':data.data.sessionID});
+				chrome.storage.sync.set({
+					'sessionID': data.data.sessionID,
+					'userID': data.data.userID
+				});
 				
 				pushNotification("You have been automatedly logged into workfront.");
 				
