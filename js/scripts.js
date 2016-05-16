@@ -5,11 +5,11 @@ chrome.storage.sync.get(null, function(storage) {
 	var wfdatacacheTimer=0;
 	function setAllRead() {
 	  ba.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
-	  ba.setBadgeText({text: ' '});   // <-- set text to '' to remove the badge
+	  ba.setBadgeText({text: ''});
 	}
 	
 	function setUnread(unreadItemCount) {
-	  ba.setBadgeBackgroundColor({color: "#f79241"});
+	  ba.setBadgeBackgroundColor({color: "#586578"});
 	  ba.setBadgeText({text: '' + unreadItemCount});
 	}
 	
@@ -91,10 +91,29 @@ chrome.storage.sync.get(null, function(storage) {
 	  return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs);
 	}
 	
+	function srt(on,descending) {
+	 on = on && on.constructor === Object ? on : {};
+	 return function(a,b){
+	   if (on.string || on.key) {
+	     a = on.key ? a[on.key] : a;
+	     a = on.string ? String(a).toLowerCase() : a;
+	     b = on.key ? b[on.key] : b;
+	     b = on.string ? String(b).toLowerCase() : b;
+	     // if key is not present, move to the end 
+	     if (on.key && (!b || !a)) {
+	      return !a && !b ? 1 : !a ? 1 : -1;
+	     }
+	   }
+	   return descending ? ~~(on.string ? b.localeCompare(a) : a < b)
+	                     : ~~(on.string ? a.localeCompare(b) : a > b);
+	  };
+	}
+	
 	function checkTimeInProgress(){
 		$.each(localStorage, function(key, val){
 			if( key.indexOf('wf_timekeeper_') > -1 ){
 				$('[data-timekeeper="'+key.replace('wf_timekeeper_','')+'"]').addClass('wf_timekeeper_pulse');
+				if($('#wf_timekeeper_header').length>0){ $('#picons').prepend('<span id="wf_timekeeper_header"><i class="fa fa-clock-o wf_timekeeper_pulse"></i></span>'); }
 			}
 		});
 		timeInProgressTicker();
@@ -155,8 +174,9 @@ chrome.storage.sync.get(null, function(storage) {
 			var wfcontent = $('#wfcontent');
 			wfcontent.empty();
 			wf.get('work?fields=name,projectID,assignedToID,percentComplete,dueDate,color', function(data){
-				for(var i = 0; i<data.data.length; i++){
-					var task = data.data[i];
+				var sorted = data.data.sort( srt({key:'projectID',string:true}, true) ); 
+				for(var i = 0; i<sorted.length; i++){
+					var task = sorted[i];
 					var dueON = $.format.date(task.dueDate, "MMMM d, yyyy");
 					var pbar = progressBar(task.percentComplete);
 					var html = '<div class="wf-list-item" data-type="task" data-project="'+task.projectID+'">'+
@@ -234,19 +254,24 @@ chrome.storage.sync.get(null, function(storage) {
 					}
 				}
 				var ids=allNots.join();
-				wf.get('note/?fields=*&id='+ids, function(data){
-					for(var i = 0; i<data.data.length; i++){
-						var note = data.data[i];
-						if(note.topNoteObjCode=="PROJ"){ type='project'; }
-						var date = $.format.date(note.entryDate, "MMMM d, yyyy");
-						var html = '<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+note.projectID+'" class="wf-list-item wf-notes" data-type="note" data-project="'+note.ID+'">'+
-										'<p>'+note.noteText+'</p><span class="wf-list-item-date">'+date+'</span>'+
-									'</a>';
-						wfcontent.append(html);
-						baCount=i;
-						setUnread(i);
-					}
-				});
+				if(ids.length>0){
+					setUnread(ids.length);
+					wf.get('note/?fields=*&id='+ids, function(data){
+						for(var i = 0; i<data.data.length; i++){
+							var note = data.data[i];
+							if(note.topNoteObjCode=="PROJ"){ type='project'; }
+							var date = $.format.date(note.entryDate, "MMMM d, yyyy");
+							var html = '<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+note.projectID+'" class="wf-list-item wf-notes" data-type="note" data-project="'+note.ID+'">'+
+											'<p>'+note.noteText+'</p><span class="wf-list-item-date">'+date+'</span>'+
+										'</a>';
+							wfcontent.append(html);
+							baCount=i;
+						}
+					});
+				}else{ 
+					setAllRead();
+					wfcontent.append("<p class='noContentText'>Nothing to see here.</p>"); 
+				}
 				jQuery.isFunction(fn) ? fn(data) : false
 			});
 		}
@@ -312,20 +337,6 @@ chrome.storage.sync.get(null, function(storage) {
 				
 			});
 		}
-	}
-	
-	
-	function ondrag(elem, fn){
-		var isDragging = false;
-		elem.mousedown(function() {
-		    isDragging = false;
-		}).mousemove(function() {
-		    isDragging = true;
-		 }).mouseup(function() {
-		    var wasDragging = isDragging;
-		    isDragging = false;
-		    if (wasDragging) { fn(); }
-		});
 	}
 	
 	

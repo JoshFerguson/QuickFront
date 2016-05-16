@@ -45,12 +45,14 @@ chrome.storage.sync.get(null, function(storage) {
 		if(action){
 			localStorage.setItem(name, new Date());
 			that.addClass('wf_timekeeper_pulse');
+			$('#picons').prepend('<span id="wf_timekeeper_header"><i class="fa fa-clock-o wf_timekeeper_pulse"></i></span>');
 		}else{
 			var elapsed = wfTime(name);
 			that.removeClass('wf_timekeeper_pulse');
 			that.next('.timeKeeper-time').text('');
 			timekeeperConfirm(_id, _kind, elapsed);
 			localStorage.removeItem(name);
+			$('#picons').find('#wf_timekeeper_header').remove();
 		}
 		that.on('mouseover', function(){
 			$(this).attr('title', wfTime(name, true));
