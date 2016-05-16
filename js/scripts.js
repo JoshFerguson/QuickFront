@@ -71,7 +71,7 @@ chrome.storage.sync.get(null, function(storage) {
 	
 	function progressBar(p){
 		var h = p == 0 ? 'hide_opacity' : '';
-		return '<div class="progress '+h+'"><div class="progress-bar" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100" style="width:'+p+'%">'+p+'%</div></div>';
+		return '<div class="progress '+h+'"><span>'+p+'%</span><div class="progress-bar" role="progressbar" aria-valuenow="'+p+'" aria-valuemin="0" aria-valuemax="100" style="width:'+p+'%"></div></div>';
 	}
 	
 	
@@ -170,57 +170,61 @@ chrome.storage.sync.get(null, function(storage) {
 	}
 	
 	var populate = {
-		mywork: function(fn){
+		mywork: function(fn, print){
 			var wfcontent = $('#wfcontent');
 			wfcontent.empty();
 			wf.get('work?fields=name,projectID,assignedToID,percentComplete,dueDate,color', function(data){
 				var sorted = data.data.sort( srt({key:'projectID',string:true}, true) ); 
 				for(var i = 0; i<sorted.length; i++){
-					var task = sorted[i];
-					var dueON = $.format.date(task.dueDate, "MMMM d, yyyy");
-					var pbar = progressBar(task.percentComplete);
-					var html = '<div class="wf-list-item" data-type="task" data-project="'+task.projectID+'">'+
-									'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
-									'<div class="wf-item-icons">'+
-										'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
-										'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
-										'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
-										'<div class="tabConfirm"></div>'+
-									'</div>'+
-								'</div>';
-								(task.color) ? chrome.storage.sync.set({ [task.projectID]: { bgColor: task.color} }) : false
-								apply_settings(task.projectID);
-					wfcontent.append(html);
-					baCount=i;
+					if(!print){
+						var task = sorted[i];
+						var dueON = $.format.date(task.dueDate, "MMMM d, yyyy");
+						var pbar = progressBar(task.percentComplete);
+						var html = '<div class="wf-list-item" data-type="task" data-project="'+task.projectID+'">'+
+										'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
+										'<div class="wf-item-icons">'+
+											'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
+											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
+											'<div class="tabConfirm"></div>'+
+										'</div>'+
+									'</div>';
+									(task.color) ? chrome.storage.sync.set({ [task.projectID]: { bgColor: task.color} }) : false
+									apply_settings(task.projectID);
+						wfcontent.append(html);
+						baCount=i;
+					}
 					wf.myprojectsarray.push(task.projectID);
 				}
 				jQuery.isFunction(fn) ? fn(data) : false
 			});
 		},
 		projects: function(fn){
-			var wfcontent = $('#wfcontent');
-			wfcontent.empty();
-			var projs = (wf.myprojectsarray).join();
-			wf.get('project/search?map=true&id='+projs+'&fields=percentComplete,plannedCompletionDate', function(data){
-				for(var i = 0; i<data.data.length; i++){
-					var task = data.data[i];
-					var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
-					var pbar = progressBar(task.percentComplete);
-					var html = '<div class="wf-list-item" data-type="project" data-project="'+task.ID+'">'+
-									'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
-									'<div class="wf-item-icons">'+
-										'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
-										'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
-										'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
-										'<div class="tabConfirm"></div>'+
-									'</div>'+
-								'</div>';
-								apply_settings(task.ID);
-					wfcontent.append(html);
-					baCount=i;
-				}
-				jQuery.isFunction(fn) ? fn(data) : false
-			});
+			this.mywork(function(){
+				var wfcontent = $('#wfcontent');
+				wfcontent.empty();
+				var projs = (wf.myprojectsarray).join();
+				wf.get('project/search?map=true&id='+projs+'&fields=percentComplete,plannedCompletionDate', function(data){
+					for(var i = 0; i<data.data.length; i++){
+						var task = data.data[i];
+						var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
+						var pbar = progressBar(task.percentComplete);
+						var html = '<div class="wf-list-item" data-type="project" data-project="'+task.ID+'">'+
+										'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
+										'<div class="wf-item-icons">'+
+											'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
+											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
+											'<div class="tabConfirm"></div>'+
+										'</div>'+
+									'</div>';
+									apply_settings(task.ID);
+						wfcontent.append(html);
+						baCount=i;
+					}
+					jQuery.isFunction(fn) ? fn(data) : false
+				});
+			}, false);
 		},
 		approvals: function(fn){
 			var wfcontent = $('#wfcontent');

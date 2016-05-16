@@ -7,16 +7,14 @@
 body{
 	min-width: 500px;
 	height: 560px;
-	overflow-x: hidden;
+	padding: 0px;
 	padding-top: 52px;
 }
 
 section {			/* Change width and height to own preferences */
 	width: 100%;
-	height: 500px;
-	overflow-x: hidden;
+	height: auto;
 }
-
 
 #pageloading{
 	position: fixed;
@@ -35,6 +33,7 @@ section {			/* Change width and height to own preferences */
 
 /* Basic style tweaks */
 .navbar { 
+	margin: 0px;
 	margin-bottom: 2px;
 	border-radius: 0px; 
 	position: fixed;
@@ -42,6 +41,13 @@ section {			/* Change width and height to own preferences */
 	left: 0px;
 	width: 100%;
 	z-index: 9999999;
+	border: 0px;
+	border-bottom: 1px #f8f8f8 solid;
+	background: white;
+}
+
+.navbar-nav li.active a{
+	background: #f8f8f8 !important;
 }
 
 #picons{
@@ -76,12 +82,9 @@ a:focus{
 	outline: none;
 }
 
-
-
 .swal-red{
 	background: #e74c3c;
 }
-
 
 .wf-list-item{
 	width: 100%;
@@ -89,7 +92,7 @@ a:focus{
 	display: inline-block;
 	padding: 6px 10px;
 	background: #f8f8f8;
-	border-bottom: 1px solid #e7e7e7;
+	border-bottom: 1px solid white;
 	border-left: 4px solid transparent;
 	border-radius: 0px;
 	color: #444444;
@@ -106,7 +109,7 @@ a:focus{
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 200px;
+	max-width: 300px;
 	display: inline-block;
 }
 
@@ -164,11 +167,22 @@ a:focus{
 .progress{
 	box-shadow: none;
 	background: transparent;
-	border: 1px solid white;
+	position: relative;
+	border-radius: 0px;
+}
+.progress span{
+	position: absolute;
+	display: block;
+	width: 50px;
+	height: 30px;
+	font-size: 12px;
+	top: 5px;
+	left: 0px;
 }
 .progress-bar{
 	background-color: #f57f29;
 	border: none;
+	height: 5px;
 }
 
 .hide_opacity{

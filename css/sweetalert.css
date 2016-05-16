@@ -295,6 +295,7 @@ body.stop-scrolling {
   margin: 20px auto;
   position: relative;
   box-sizing: content-box;
+  z-index: -1;
 }
 .sweet-alert .sa-icon.sa-error {
   border-color: #d43f3a;
