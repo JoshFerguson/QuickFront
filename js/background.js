@@ -7,11 +7,13 @@ chrome.storage.sync.get(null, function(storage) {
 	function setAllRead() {
 	  ba.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
 	  ba.setBadgeText({text: ''});
+	  chrome.storage.sync.set({ 'BadgeText': 0 });
 	}
 	
 	function setUnread(unreadItemCount) {
-	  ba.setBadgeBackgroundColor({color: "#586578"});
-	  ba.setBadgeText({text: '' + unreadItemCount});
+		ba.setBadgeBackgroundColor({color: "#586578"});
+		ba.setBadgeText({text: '' + unreadItemCount});
+		chrome.storage.sync.set({ 'BadgeText': unreadItemCount });
 	}
 	
 	function pushNotification(message) {
@@ -48,7 +50,6 @@ chrome.storage.sync.get(null, function(storage) {
 		xmlhttp.send(null);
 	}
 	var notifys = 0;
-	var unseen = 0;
 	function getNotifus(){
 		wfgetJson(apiPath+'notifications?fields=note,acknowledgementID', function(data){
 			for(var i = 0; i<50; i++){
@@ -56,10 +57,9 @@ chrome.storage.sync.get(null, function(storage) {
 					notifys++;
 				}
 			}
-			if(notifys > unseen){
+			if(notifys > storage.BadgeText){
 				pushNotification("You have "+notifys+" new notification(s)");
 				setUnread(notifys);
-				unseen=notifys;
 			}
 			notifys=0;
 		});

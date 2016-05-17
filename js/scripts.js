@@ -3,14 +3,17 @@ chrome.storage.sync.get(null, function(storage) {
 	var ba = chrome.browserAction;
 	var baCount=0;
 	var wfdatacacheTimer=0;
+	
 	function setAllRead() {
 	  ba.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
 	  ba.setBadgeText({text: ''});
+	  chrome.storage.sync.set({ 'BadgeText': 0 });
 	}
 	
 	function setUnread(unreadItemCount) {
-	  ba.setBadgeBackgroundColor({color: "#586578"});
-	  ba.setBadgeText({text: '' + unreadItemCount});
+		ba.setBadgeBackgroundColor({color: "#586578"});
+		ba.setBadgeText({text: '' + unreadItemCount});
+		chrome.storage.sync.set({ 'BadgeText': unreadItemCount });
 	}
 	
 	function thispage(){
@@ -63,7 +66,10 @@ chrome.storage.sync.get(null, function(storage) {
 				data = (val[pid]) ? val[pid] : false;
 				if(data){
 					//Set backgound color
-					(data.bgColor) ? $('[data-project="'+pid+'"]').css('border-left-color', data.bgColor) : false;
+					var that = $('[data-project="'+pid+'"]');
+					(data.bgColor) ? that.css('border-left-color', data.bgColor) : false;
+					(data.bgColor) ? that.find('.progress-bar').css('background-color', data.bgColor) : false;
+					(data.bgColor) ? that.find('.wf_timekeeper_pulse').css('color', data.bgColor) : false;
 				}
 			});
 		}
@@ -130,6 +136,8 @@ chrome.storage.sync.get(null, function(storage) {
 			});
 		}, 1000)
 	}
+	
+	function ia(arr,ent){ return jQuery.inArray(ent, arr ); }
 	 
 	var wf = {
 		myprojectsarray: [],
@@ -166,6 +174,11 @@ chrome.storage.sync.get(null, function(storage) {
 			wf.get('hour/?updates={"'+kind+'":"'+taskID+'","hours":"'+time+'","status":"SUB"}&sessionID='+storage.sessionID+'&method=post', function(){
 				swal("Done", "Your time has been logged", "success");
 			});
+		},
+		actionBar: function(act){
+			var bar = "";
+			bar += (ia(act,'link')) ? "" : "";
+			return bar;
 		}
 	}
 	
@@ -183,8 +196,9 @@ chrome.storage.sync.get(null, function(storage) {
 						var html = '<div class="wf-list-item" data-type="task" data-project="'+task.projectID+'">'+
 										'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 										'<div class="wf-item-icons">'+
-											'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
 											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+											'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
+											'<a href="upload.html?edit='+task.projectID+'"><i class="fa fa-cloud-upload"></i></a>'+
 											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 											'<div class="tabConfirm"></div>'+
 										'</div>'+
@@ -212,8 +226,8 @@ chrome.storage.sync.get(null, function(storage) {
 						var html = '<div class="wf-list-item" data-type="project" data-project="'+task.ID+'">'+
 										'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 										'<div class="wf-item-icons">'+
-											'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
 											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
+											'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
 											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 											'<div class="tabConfirm"></div>'+
 										'</div>'+
@@ -258,7 +272,7 @@ chrome.storage.sync.get(null, function(storage) {
 					}
 				}
 				var ids=allNots.join();
-				if(ids.length>0){
+				if(allNots.length>0){
 					setUnread(allNots.length);
 					wf.get('note/?fields=*&id='+ids, function(data){
 						for(var i = 0; i<data.data.length; i++){
@@ -318,27 +332,33 @@ chrome.storage.sync.get(null, function(storage) {
 		if(thispage()=="edit.html"){
 			var edit_id = getParameterByName('edit')
 			chrome.storage.sync.get(edit_id, function(val){
-				var optiins = {
-					bgColor : '#eeeeee'
-				};
-	
-				$('#cp3').colorpicker({
-		            color: (val[edit_id]) ? val[edit_id].bgColor : optiins.bgColor,
-		            format: 'hex'
-		        });
-		        $('#ptitle').text( edit_id );
-		        
-		        $( "#editProj" ).submit(function( event ) {
-			        event.preventDefault();
-			        var form = $(this);
-			        chrome.storage.sync.set({
-						[edit_id]: {
-							bgColor: $('#cp3 input').val()
-						}
-					});
-					swal("Saved", "Your preferences have been saved.", "success");
-			    });
-				
+				wf.get('project/'+edit_id+'?fields=*', function(data){
+					console.log(data)
+					var project = data.data;
+					var optiins = {
+						bgColor : '#eeeeee'
+					};
+					
+					$('.progress').find('span').text(project.percentComplete+"%");
+					$('.progress-bar').attr('aria-valuenow', project.percentComplete).css('width', project.percentComplete+"%")
+		
+					$('#cp3').colorpicker({
+			            color: (val[edit_id]) ? val[edit_id].bgColor : optiins.bgColor,
+			            format: 'hex'
+			        });
+			        $('#ptitle').text( project.name );
+			        
+			        $( "#editProj" ).submit(function( event ) {
+				        event.preventDefault();
+				        var form = $(this);
+				        chrome.storage.sync.set({
+							[edit_id]: {
+								bgColor: $('#cp3 input').val()
+							}
+						});
+						swal("Saved", "Your preferences have been saved.", "success");
+				    });
+				});
 			});
 		}
 	}
@@ -355,9 +375,11 @@ chrome.storage.sync.get(null, function(storage) {
 				$('#pageloading').hide();
 			});
 			
-			populate.notifications(function(){
-				checkTimeInProgress();
-			});
+			if(thispage()=="popup.html"){
+				populate.notifications(function(){
+					checkTimeInProgress();
+				});
+			}
 			
 			$('[data-load]').on('click', function(){
 				$('[data-load]').parent().removeClass('active');
