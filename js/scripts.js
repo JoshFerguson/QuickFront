@@ -201,6 +201,7 @@ chrome.storage.sync.get(null, function(storage) {
 											'<a href="upload.html?edit='+task.projectID+'"><i class="fa fa-cloud-upload"></i></a>'+
 											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 											'<div class="tabConfirm"></div>'+
+											'<span class="wf-list-item-details-btn"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></span>'+
 										'</div>'+
 									'</div>';
 									(task.color) ? chrome.storage.sync.set({ [task.projectID]: { bgColor: task.color} }) : false
@@ -230,6 +231,7 @@ chrome.storage.sync.get(null, function(storage) {
 											'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
 											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 											'<div class="tabConfirm"></div>'+
+											'<span class="wf-list-item-details-btn"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></span>'+
 										'</div>'+
 									'</div>';
 									apply_settings(task.ID);
@@ -275,6 +277,7 @@ chrome.storage.sync.get(null, function(storage) {
 				if(allNots.length>0){
 					setUnread(allNots.length);
 					wf.get('note/?fields=*&id='+ids, function(data){
+						console.log(data)
 						for(var i = 0; i<data.data.length; i++){
 							var note = data.data[i];
 							if(note.topNoteObjCode=="PROJ"){ type='project'; }
