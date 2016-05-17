@@ -9,12 +9,13 @@ body{
 	height: 560px;
 	padding: 0px;
 	padding-top: 52px;
+	overflow: hidden;
 }
 
 section {			/* Change width and height to own preferences */
 	width: 100%;
-	min-height: 500px;
-	height: auto;
+	height: 550px;
+	overflow-x: auto;
 }
 
 #pageloading{

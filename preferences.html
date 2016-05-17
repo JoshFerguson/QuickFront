@@ -29,12 +29,14 @@
 		
 		<section>
 			
-			<form name="prefform" id="prefform">
+			<form name="prefform" id="prefform" autocomplete="off">
 			<div class="bootstrap-iso">
 			 <div class="container-fluid">
 			  <div class="row">
 			   <div class="col-md-6 col-sm-6 col-xs-12">
-			     <div class="form-group ">
+				   
+				   
+			     <div class="form-group " style="display: none">
 			      <label class="control-label " for="name">
 			       First Name
 			      </label>
@@ -46,7 +48,7 @@
 			       <input class="form-control" id="fname" name="fname" type="text"/>
 			      </div>
 			     </div>
-			     <div class="form-group ">
+			     <div class="form-group " style="display: none">
 			      <label class="control-label " for="name">
 			       Last Name
 			      </label>
@@ -58,6 +60,8 @@
 			       <input class="form-control" id="lname" name="lname" type="text"/>
 			      </div>
 			     </div>
+			     
+			     
 			     <div class="form-group ">
 			      <label class="control-label " for="username">
 			       Username

@@ -65,11 +65,9 @@ chrome.storage.sync.get(null, function(storage) {
 			chrome.storage.sync.get(pid, function(val){
 				data = (val[pid]) ? val[pid] : false;
 				if(data){
-					//Set backgound color
 					var that = $('[data-project="'+pid+'"]');
 					(data.bgColor) ? that.css('border-left-color', data.bgColor) : false;
 					(data.bgColor) ? that.find('.progress-bar').css('background-color', data.bgColor) : false;
-					(data.bgColor) ? that.find('.wf_timekeeper_pulse').css('color', data.bgColor) : false;
 				}
 			});
 		}
@@ -119,7 +117,10 @@ chrome.storage.sync.get(null, function(storage) {
 		$.each(localStorage, function(key, val){
 			if( key.indexOf('wf_timekeeper_') > -1 ){
 				$('[data-timekeeper="'+key.replace('wf_timekeeper_','')+'"]').addClass('wf_timekeeper_pulse');
-				if($('#wf_timekeeper_header').length>0){ $('#picons').prepend('<span id="wf_timekeeper_header"><i class="fa fa-clock-o wf_timekeeper_pulse"></i></span>'); }
+				if($('#wf_timekeeper_header').length==0){ 
+					$('#picons').prepend('<span id="wf_timekeeper_header"><i class="fa fa-clock-o wf_timekeeper_pulse"></i></span>'); 
+				}
+				
 			}
 		});
 		timeInProgressTicker();
