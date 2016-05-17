@@ -28,7 +28,7 @@ chrome.storage.sync.get(null, function(storage) {
 		$('body').on('click', '.saveTime', function(){
 			if(kind=="task"){ kind = 'taskID'; }
 			if(kind=="project"){ kind = 'projectID'; }
-			if(kind=="Issue"){ kind = 'opTaskID'; }
+			if(kind=="issue"){ kind = 'opTaskID'; }
 			time = tab.closest('.wf-list-item').find('.tabConfirmTime').val();
 			var url = apiPath+'hour/?updates={"'+kind+'":"'+_id+'","hours":"'+time+'","status":"SUB"}&sessionID='+storage.sessionID+'&method=post';
 			$.post(url).done(function(data){

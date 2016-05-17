@@ -259,7 +259,7 @@ chrome.storage.sync.get(null, function(storage) {
 				}
 				var ids=allNots.join();
 				if(ids.length>0){
-					setUnread(ids.length);
+					setUnread(allNots.length);
 					wf.get('note/?fields=*&id='+ids, function(data){
 						for(var i = 0; i<data.data.length; i++){
 							var note = data.data[i];
