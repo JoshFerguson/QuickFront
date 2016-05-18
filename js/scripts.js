@@ -385,7 +385,7 @@ chrome.storage.sync.get(null, function(storage) {
             if (storage.MenuOrder) {
                 $("ol.MenuOrder").empty();
                 $.each(storage.MenuOrder, function(key, val) {
-                    $("ol.MenuOrder").append('<li data-name="' + val.name + '">' + val.name + '</li>');
+                    $("ol.MenuOrder").append('<li data-name="' + val.name + '">' + val.name + ' <input type="radio" name="MenuOrderActive" /></li>');
                 });
             }
 
