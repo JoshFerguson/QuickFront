@@ -402,7 +402,8 @@ chrome.storage.sync.get(null, function(storage) {
 			});
 			
 			if(thispage()=="popup.html"){
-				populate.notifications(function(){
+				var dft = $('#custmenu').find('.active > a').data('load');
+				populate[dft](function(){
 					checkTimeInProgress();
 				});
 			}
