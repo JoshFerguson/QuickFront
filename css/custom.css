@@ -27,9 +27,14 @@ section {			/* Change width and height to own preferences */
 	text-align: center;
 	display: none;
 }
-#pageloading .fa{
-	margin-top: 40%;
+#pageloading i{
+	margin-top: 30%;
 	color: #f57f29;
+	font-size: 50px;
+}
+
+a, .a{
+	color: #616670;
 }
 
 
@@ -236,7 +241,47 @@ a:focus{
     margin-top: -15px;
 }
 
+
+
+body.dragging, body.dragging * {
+  cursor: move !important;
+}
+
+.dragged {
+  position: absolute;
+  opacity: 0.5;
+  z-index: 2000;
+}
+
+ol.MenuOrder{
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+ol.MenuOrder li{
+	display: inline-block;
+	margin: 2px;
+	text-align: center;
+	padding: 5px 10px;
+	width: 100px;
+	height: 30px;
+	background: #eeeeee;
+	border: 1px solid silver;
+	border-radius: 3px;
+}
+
+ol.MenuOrder li.placeholder {
+	position: relative;
+	top: 11px;
+  /** More li styles **/
+}
+ol.MenuOrder li.placeholder:before {
+  position: absolute;
+  /** Define arrowhead **/
+}
+
 /* Scroll Bar */
-::-webkit-scrollbar { width: 0px; }
-::-webkit-scrollbar-track { -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); }
-::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb:window-inactive  { background: #f79241; }
+::-webkit-scrollbar { width: 0px; display: none;  }
+::-webkit-scrollbar-track { display: none; }
+::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb:window-inactive  { background: transparent; display: none;  }

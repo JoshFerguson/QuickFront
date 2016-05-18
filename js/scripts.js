@@ -118,7 +118,7 @@ chrome.storage.sync.get(null, function(storage) {
 			if( key.indexOf('wf_timekeeper_') > -1 ){
 				$('[data-timekeeper="'+key.replace('wf_timekeeper_','')+'"]').addClass('wf_timekeeper_pulse');
 				if($('#wf_timekeeper_header').length==0){ 
-					$('#picons').prepend('<span id="wf_timekeeper_header"><i class="fa fa-clock-o wf_timekeeper_pulse"></i></span>'); 
+					$('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>'); 
 				}
 				
 			}
@@ -197,12 +197,12 @@ chrome.storage.sync.get(null, function(storage) {
 						var html = '<div class="wf-list-item" data-type="task" data-project="'+task.projectID+'">'+
 										'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 										'<div class="wf-item-icons">'+
-											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
-											'<a href="edit.html?edit='+task.projectID+'"><i class="fa fa-cog item-settings"></i></a>'+
-											'<a href="upload.html?edit='+task.projectID+'"><i class="fa fa-cloud-upload"></i></a>'+
-											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
+											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/task/view?ID='+task.ID+'"><i class="zmdi zmdi-open-in-browser"></i></a>'+
+											'<a href="edit.html?edit='+task.projectID+'"><i class="zmdi zmdi-settings item-settings"></i></a>'+
+											'<a href="upload.html?edit='+task.projectID+'"><i class="zmdi zmdi-cloud-upload"></i></a>'+
+											'<i class="zmdi zmdi-time timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 											'<div class="tabConfirm"></div>'+
-											'<span class="wf-list-item-details-btn"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></span>'+
+											'<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>'+
 										'</div>'+
 									'</div>';
 									(task.color) ? chrome.storage.sync.set({ [task.projectID]: { bgColor: task.color} }) : false
@@ -228,11 +228,12 @@ chrome.storage.sync.get(null, function(storage) {
 						var html = '<div class="wf-list-item" data-type="project" data-project="'+task.ID+'">'+
 										'<strong>'+task.name+'</strong><span class="wf-list-item-date">Due: '+dueON+'</span>'+pbar+
 										'<div class="wf-item-icons">'+
-											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="fa fa-external-link-square"></i></a>'+
-											'<a href="edit.html?edit='+task.ID+'"><i class="fa fa-cog item-settings"></i></a>'+
-											'<i class="fa fa-clock-o timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
+											'<a target="_blank" href="https://'+storage.wfdomain+'.attask-ondemand.com/project/view?ID='+task.ID+'"><i class="zmdi zmdi-open-in-browser"></i></a>'+
+											'<a href="edit.html?edit='+task.ID+'"><i class="zmdi zmdi-settings item-settings"></i></a>'+
+											'<a href="upload.html?edit='+task.projectID+'"><i class="zmdi zmdi-cloud-upload"></i></a>'+
+											'<i class="zmdi zmdi-time timeKeeper" data-timekeeper="'+task.ID+'"></i><span class="timeKeeper-time"></span>'+
 											'<div class="tabConfirm"></div>'+
-											'<span class="wf-list-item-details-btn"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></span>'+
+											'<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>'+
 										'</div>'+
 									'</div>';
 									apply_settings(task.ID);
@@ -330,6 +331,27 @@ chrome.storage.sync.get(null, function(storage) {
 			$('#resetConfig').on('click', function(){
 				chrome.storage.sync.set({"fname": null,"lname": null,"username": null,"password": null,"wfdomain": null,"refreshrate": null,"isConfiged": null});
 				window.location="welcome.html";
+			});
+			
+			$("input[type='checkbox']").bootstrapSwitch({
+				size: 'mini'
+			});
+			
+			if(storage.MenuOrder){
+				$("ol.MenuOrder").empty();
+				$.each(storage.MenuOrder, function(key, val){
+					$("ol.MenuOrder").append('<li data-name="'+val.name+'">'+val.name+'</li>');
+				});
+			}
+			
+			var group = $("ol.MenuOrder").sortable({
+			  group: 'serialization',
+			  onDrop: function ($item, container, _super) {
+			    var data = group.sortable("serialize").get();
+				chrome.storage.sync.set({'MenuOrder': data[0]});
+				console.log(data[0])
+			    _super($item, container);
+			  }
 			});
 			
 		}
