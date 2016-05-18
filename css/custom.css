@@ -60,6 +60,10 @@ a, .a{
 #picons{
 	float: right;
 	margin-top: 13px;
+	font-size: 18px;
+}
+#picons i{
+	margin-left: 5px;
 }
 
 .navbar-brand{

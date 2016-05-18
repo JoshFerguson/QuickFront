@@ -130,7 +130,8 @@ chrome.storage.sync.get(null, function(storage) {
     function checkTimeInProgress() {
         $.each(localStorage, function(key, val) {
             if (key.indexOf('wf_timekeeper_') > -1) {
-                $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').addClass('wf_timekeeper_pulse');
+                var that = $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').addClass('wf_timekeeper_pulse');
+                $('.timeKeeper').not(that).hide();
                 if ($('#wf_timekeeper_header').length == 0) {
                     $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
                 }
@@ -159,6 +160,26 @@ chrome.storage.sync.get(null, function(storage) {
     function ia(arr, ent) {
         return jQuery.inArray(ent, arr);
     }
+    
+    function reorderMenu(orderedArray) {
+	    var items = [];
+	    $('#custmenu li').each(function(){
+		    var t = $(this)
+		    var it = {
+			    name: t.data('mo'),
+			    html: '<li data-mo="'+t.data('mo')+'">'+t.html()+'</li>'
+		    }
+		    items.push(it)
+	    });
+	    $('#custmenu').empty();
+	  
+	    $.each(storage.MenuOrder, function(key, val){
+		    var result = $.grep(items, function(e){ return e.name == val.name; });
+		    $('#custmenu').append(result[0].html);
+		    $('#custmenu').find('li:first').addClass('active')
+	    });
+	    
+	}
 
     var wf = {
         myprojectsarray: [],
@@ -230,7 +251,7 @@ chrome.storage.sync.get(null, function(storage) {
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/task/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
                             '<a href="edit.html?edit=' + task.projectID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
-                            '<a href="upload.html?edit=' + task.projectID + '"><i class="zmdi zmdi-cloud-upload"></i></a>' +
+                            //'<a href="upload.html?edit=' + task.projectID + '"><i class="zmdi zmdi-cloud-upload"></i></a>' +
                             '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
                             '<div class="tabConfirm"></div>' +
                             '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
@@ -265,7 +286,7 @@ chrome.storage.sync.get(null, function(storage) {
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/project/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
                             '<a href="edit.html?edit=' + task.ID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
-                            '<a href="upload.html?edit=' + task.projectID + '"><i class="zmdi zmdi-cloud-upload"></i></a>' +
+                            //'<a href="upload.html?edit=' + task.projectID + '"><i class="zmdi zmdi-cloud-upload"></i></a>' +
                             '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
                             '<div class="tabConfirm"></div>' +
                             '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
@@ -385,7 +406,7 @@ chrome.storage.sync.get(null, function(storage) {
             if (storage.MenuOrder) {
                 $("ol.MenuOrder").empty();
                 $.each(storage.MenuOrder, function(key, val) {
-                    $("ol.MenuOrder").append('<li data-name="' + val.name + '">' + val.name + ' <input type="radio" name="MenuOrderActive" /></li>');
+                    $("ol.MenuOrder").append('<li data-name="' + val.name + '">' + val.name + '</li>');
                 });
             }
 
@@ -453,6 +474,8 @@ chrome.storage.sync.get(null, function(storage) {
                 populate[dft](function() {
                     checkTimeInProgress();
                 });
+                var menus = ['Projects', 'My Work', 'Approvals', 'Notifications'];
+                reorderMenu(menus)
             }
 
             $('[data-load]').on('click', function() {

@@ -45,6 +45,7 @@ chrome.storage.sync.get(null, function(storage) {
 		if(action){
 			localStorage.setItem(name, new Date());
 			that.addClass('wf_timekeeper_pulse');
+			$('.timeKeeper').not(that).hide();
 			$('#picons').prepend('<span id="wf_timekeeper_header"><i class="fa fa-clock-o wf_timekeeper_pulse"></i></span>');
 		}else{
 			var elapsed = wfTime(name);
@@ -53,6 +54,7 @@ chrome.storage.sync.get(null, function(storage) {
 			timekeeperConfirm(_id, _kind, elapsed);
 			localStorage.removeItem(name);
 			$('#picons').find('#wf_timekeeper_header').remove();
+			$('.timeKeeper').show();
 		}
 		that.on('mouseover', function(){
 			$(this).attr('title', wfTime(name, true));
