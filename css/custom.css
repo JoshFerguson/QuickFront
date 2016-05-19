@@ -37,6 +37,10 @@ a, .a{
 	color: #616670;
 }
 
+.hide{
+	display: none;
+}
+
 
 /* Basic style tweaks */
 .navbar { 
@@ -284,6 +288,21 @@ ol.MenuOrder li.placeholder:before {
   position: absolute;
   /** Define arrowhead **/
 }
+
+#finder{
+	width: 100%;
+	height: 40px;
+	border: none;
+	padding: 5px 15px;
+}
+#finder:focus{
+	outline: none;
+}
+
+#finder::-webkit-input-placeholder { color: #bebebe; }
+#finder:-moz-placeholder { color: #bebebe; }
+#finder::-moz-placeholder { color: #bebebe; }
+#finder:-ms-input-placeholder { color: #bebebe; }
 
 /* Scroll Bar */
 ::-webkit-scrollbar { width: 0px; display: none;  }

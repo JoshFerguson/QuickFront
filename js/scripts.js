@@ -1,3 +1,8 @@
+var searchVar = {
+    time: "$time",
+    complete: "$done",
+    duePast: "$past"
+}
 chrome.storage.sync.get(null, function(storage) {
 
     var ba = chrome.browserAction;
@@ -130,7 +135,7 @@ chrome.storage.sync.get(null, function(storage) {
     function checkTimeInProgress() {
         $.each(localStorage, function(key, val) {
             if (key.indexOf('wf_timekeeper_') > -1) {
-                var that = $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').addClass('wf_timekeeper_pulse');
+                var that = $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').addClass('wf_timekeeper_pulse').html('<span class="hide">'+searchVar.time+'</span>');;
                 $('.timeKeeper').not(that).hide();
                 if ($('#wf_timekeeper_header').length == 0) {
                     $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
@@ -479,6 +484,7 @@ chrome.storage.sync.get(null, function(storage) {
             }
 
             $('[data-load]').on('click', function() {
+	            $('#wfcontent').empty();
                 $('[data-load]').parent().removeClass('active');
                 $(this).parent().addClass('active');
                 var apac = $(this).data('load');
@@ -486,6 +492,18 @@ chrome.storage.sync.get(null, function(storage) {
                     checkTimeInProgress();
                 });
             });
+            
+			$('#finder').keyup(function(e){
+			    var query = $.trim($(this).val()).toLowerCase();
+			    $('.wf-list-item').each(function(){
+			         var $this = $(this);
+			         var con = $this.text().toLowerCase();
+			         if(con.indexOf(query) === -1)
+			             $this.fadeOut('slow');
+			        else $this.fadeIn('slow');
+			    });
+			});
+            
         } //Is isConfiged
         pageActions();
         $('.navbar').dblclick(function() {
