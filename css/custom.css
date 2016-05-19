@@ -124,7 +124,7 @@ a:focus{
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 300px;
+	max-width: 340px;
 	display: inline-block;
 }
 
@@ -133,6 +133,10 @@ a:focus{
 	font-size: 11px;
 	float: right;
 	padding-top: 3px;
+}
+
+.data-pasted{
+	color: darkred;
 }
 
 .wf-notes .wf-list-item-date{

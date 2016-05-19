@@ -249,10 +249,12 @@ chrome.storage.sync.get(null, function(storage) {
                 for (var i = 0; i < sorted.length; i++) {
                     if (!print) {
                         var task = sorted[i];
+                        var datClass = 'date-good';
+                        if(new Date(task.dueDate) > new Date()){ datClass = 'data-pasted' }
                         var dueON = $.format.date(task.dueDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
                         var html = '<div class="wf-list-item" data-type="task" data-project="' + task.projectID + '">' +
-                            '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
+                            '<strong>' + task.name + '</strong><span class="wf-list-item-date '+datClass+'">Due: ' + dueON + '</span>' + pbar +
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/task/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
                             '<a href="edit.html?edit=' + task.projectID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
@@ -284,10 +286,12 @@ chrome.storage.sync.get(null, function(storage) {
                 wf.get('project/search?map=true&id=' + projs + '&fields=percentComplete,plannedCompletionDate', function(data) {
                     for (var i = 0; i < data.data.length; i++) {
                         var task = data.data[i];
+                        var datClass = 'date-good';
+                        if(new Date(task.dueDate) < new Date()){ datClass = 'data-pasted' }
                         var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
                         var html = '<div class="wf-list-item" data-type="project" data-project="' + task.ID + '">' +
-                            '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
+                            '<strong>' + task.name + '</strong><span class="wf-list-item-date '+datClass+'">Due: ' + dueON + '</span>' + pbar +
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/project/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
                             '<a href="edit.html?edit=' + task.ID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
@@ -499,8 +503,8 @@ chrome.storage.sync.get(null, function(storage) {
 			         var $this = $(this);
 			         var con = $this.text().toLowerCase();
 			         if(con.indexOf(query) === -1)
-			             $this.fadeOut('slow');
-			        else $this.fadeIn('slow');
+			             $this.fadeOut();
+			        else $this.fadeIn();
 			    });
 			});
             
