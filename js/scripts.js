@@ -136,6 +136,7 @@ chrome.storage.sync.get(null, function(storage) {
         $.each(localStorage, function(key, val) {
             if (key.indexOf('wf_timekeeper_') > -1) {
                 var that = $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').addClass('wf_timekeeper_pulse').html('<span class="hide">'+searchVar.time+'</span>');;
+                chrome.browserAction.setIcon({path: 'img/icon48-time.png'});
                 $('.timeKeeper').not(that).hide();
                 if ($('#wf_timekeeper_header').length == 0) {
                     $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
