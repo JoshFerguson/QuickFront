@@ -135,8 +135,20 @@ a:focus{
 	padding-top: 3px;
 }
 
-.data-pasted{
-	color: darkred;
+.date-pasted{	
+	background: #f8f8f8;
+	background: -moz-linear-gradient(left,  #f8f8f8 0%, #f8f8f8 90%, #ffa993 100%, #ffa993 100%);
+	background: -webkit-linear-gradient(left,  #f8f8f8 0%,#f8f8f8 90%,#ffa993 100%,#ffa993 100%);
+	background: linear-gradient(to right,  #f8f8f8 0%,#f8f8f8 90%,#ffa993 100%,#ffa993 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f8f8', endColorstr='#ffa993',GradientType=1 );
+}
+
+.date-faraway{	
+	background: #2ecc71;
+	background: -moz-linear-gradient(left,  #f8f8f8 0%, #f8f8f8 90%, #2ecc71 100%, #2ecc71 100%);
+	background: -webkit-linear-gradient(left,  #f8f8f8 0%,#f8f8f8 90%,#2ecc71 100%,#2ecc71 100%);
+	background: linear-gradient(to right,  #f8f8f8 0%,#f8f8f8 90%,#2ecc71 100%,#2ecc71 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f8f8', endColorstr='#2ecc71',GradientType=1 );
 }
 
 .wf-notes .wf-list-item-date{
