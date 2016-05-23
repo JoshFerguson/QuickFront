@@ -136,6 +136,7 @@ chrome.storage.sync.get(null, function(storage) {
         $.each(localStorage, function(key, val) {
             if (key.indexOf('wf_timekeeper_') > -1) {
                 var that = $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').addClass('wf_timekeeper_pulse').html('<span class="hide">'+searchVar.time+'</span>');;
+                chrome.browserAction.setIcon({path: 'img/icon48-time.png'});
                 $('.timeKeeper').not(that).hide();
                 if ($('#wf_timekeeper_header').length == 0) {
                     $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
@@ -178,12 +179,22 @@ chrome.storage.sync.get(null, function(storage) {
 	    });
 	    $('#custmenu').empty();
 	  
-	    $.each(storage.MenuOrder, function(key, val){
+	    $.each(orderedArray, function(key, val){
 		    var result = $.grep(items, function(e){ return e.name == val.name; });
 		    $('#custmenu').append(result[0].html);
 		    $('#custmenu').find('li:first').addClass('active')
 	    });
 	    
+	}
+	
+	function isPast(date, output) {
+		var selectedDate = new Date(date.replace('T', ' '));
+		var now = new Date();
+		if (selectedDate < now) {
+			return output[0] || true;
+		}else{
+			return output[1];
+		}
 	}
 
     var wf = {
@@ -241,7 +252,7 @@ chrome.storage.sync.get(null, function(storage) {
         mywork: function(fn, print) {
             var wfcontent = $('#wfcontent');
             wfcontent.empty();
-            wf.get('work?fields=name,projectID,assignedToID,percentComplete,dueDate,color', function(data) {
+            wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate,color', function(data) {
                 var sorted = data.data.sort(srt({
                     key: 'projectID',
                     string: true
@@ -249,12 +260,11 @@ chrome.storage.sync.get(null, function(storage) {
                 for (var i = 0; i < sorted.length; i++) {
                     if (!print) {
                         var task = sorted[i];
-                        var datClass = 'date-good';
-                        if(new Date(task.dueDate) > new Date()){ datClass = 'data-pasted' }
-                        var dueON = $.format.date(task.dueDate, "MMMM d, yyyy");
+                        var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
+                        var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
-                        var html = '<div class="wf-list-item" data-type="task" data-project="' + task.projectID + '">' +
-                            '<strong>' + task.name + '</strong><span class="wf-list-item-date '+datClass+'">Due: ' + dueON + '</span>' + pbar +
+                        var html = '<div class="wf-list-item '+datClass+'" data-type="task" data-project="' + task.projectID + '">' +
+                            '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/task/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
                             '<a href="edit.html?edit=' + task.projectID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
@@ -286,12 +296,11 @@ chrome.storage.sync.get(null, function(storage) {
                 wf.get('project/search?map=true&id=' + projs + '&fields=percentComplete,plannedCompletionDate', function(data) {
                     for (var i = 0; i < data.data.length; i++) {
                         var task = data.data[i];
-                        var datClass = 'date-good';
-                        if(new Date(task.dueDate) < new Date()){ datClass = 'data-pasted' }
+                        var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
                         var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
-                        var html = '<div class="wf-list-item" data-type="project" data-project="' + task.ID + '">' +
-                            '<strong>' + task.name + '</strong><span class="wf-list-item-date '+datClass+'">Due: ' + dueON + '</span>' + pbar +
+                        var html = '<div class="wf-list-item '+datClass+'" data-type="project" data-project="' + task.ID + '">' +
+                            '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/project/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
                             '<a href="edit.html?edit=' + task.ID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
@@ -484,7 +493,7 @@ chrome.storage.sync.get(null, function(storage) {
                     checkTimeInProgress();
                 });
                 var menus = ['Projects', 'My Work', 'Approvals', 'Notifications'];
-                reorderMenu(menus)
+                reorderMenu(storage.MenuOrder || menus)
             }
 
             $('[data-load]').on('click', function() {
