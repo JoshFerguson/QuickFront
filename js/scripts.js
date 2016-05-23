@@ -520,10 +520,22 @@ chrome.storage.sync.get(null, function(storage) {
         } //Is isConfiged
         pageActions();
         $('.navbar').dblclick(function() {
-            var w = $(document).width(),
-                h = $(document).height();
-            var sw = screen.width - 530;
-            window.open('chrome-extension://nfinbnedefiaammkllfcmcecjbhjobii/popup.html', 'Quick Front', 'width=' + w + ', height=' + h + ' top=75, left=' + sw);
+            swal({
+	            title: "New Window?",   
+	            text: "Do you want to open this in a new window?",   
+	            type: "info",   
+	            showCancelButton: true,     
+	            confirmButtonText: "Yes",   
+	            cancelButtonText: "Cancel",   
+	            closeOnConfirm: true,   
+	            closeOnCancel: true 
+	        },function(isConfirm){ 
+		        if (isConfirm) { 
+			        var w = $(document).width(),h = $(document).height();
+					var sw = screen.width - 530;
+			        window.open('popup.html', 'Quick Front', 'width=' + w + ', height=' + h + ' top=75, left=' + sw);  
+			    }
+			});
             return false;
         });
     });
