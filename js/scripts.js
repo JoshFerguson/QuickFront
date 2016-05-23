@@ -3,9 +3,6 @@ var searchVar = {
     complete: "$done",
     duePast: "$past"
 }
-var cache = {
-	projects: []
-}
 chrome.storage.sync.get(null, function(storage) {
 
     var ba = chrome.browserAction;
@@ -87,7 +84,7 @@ chrome.storage.sync.get(null, function(storage) {
             chrome.storage.sync.get(pid, function(val) {
                 data = (val[pid]) ? val[pid] : false;
                 if (data) {
-                    var that = $('[data-project="' + pid + '"], [data-group="' + pid + '"]');
+                    var that = $('[data-project="' + pid + '"]');
                     (data.bgColor) ? that.css('border-left-color', data.bgColor): false;
                     (data.bgColor) ? that.find('.progress-bar').css('background-color', data.bgColor): false;
                 }
@@ -278,12 +275,6 @@ chrome.storage.sync.get(null, function(storage) {
                     }
                     wf.myprojectsarray.push(task.projectID);
                 }
-                var projs = $('.wf-list-item').map(function() { return $(this).attr('data-project'); });
-                var uniqueProjs = $.unique(projs);
-				$(uniqueProjs).each(function(i, v){
-					var cl = (storage[v].toggleState) ? 'wf-list-group-closed' : '';
-				    $('#wfcontent > [data-project="'+v+'"]').wrapAll('<div class="wf-list-group '+cl+'" data-group="'+v+'"></div>');
-				});
                 jQuery.isFunction(fn) ? fn(data) : false
             });
         },
@@ -291,7 +282,6 @@ chrome.storage.sync.get(null, function(storage) {
             this.mywork(function() {
                 var wfcontent = $('#wfcontent');
                 wfcontent.empty();
-                cache.projects=[];
                 var projs = (wf.myprojectsarray).join();
                 wf.get('project/search?map=true&id=' + projs + '&fields=percentComplete,plannedCompletionDate', function(data) {
                     for (var i = 0; i < data.data.length; i++) {
@@ -314,7 +304,6 @@ chrome.storage.sync.get(null, function(storage) {
                         apply_settings(task.ID);
                         wfcontent.append(html);
                         baCount = i;
-                        cache.projects.push([task.ID, task.name, dueON])
                     }
                     jQuery.isFunction(fn) ? fn(data) : false
                 });
@@ -467,8 +456,7 @@ chrome.storage.sync.get(null, function(storage) {
                         var form = $(this);
                         chrome.storage.sync.set({
                             [edit_id]: {
-                                bgColor: $('#cp3 input').val(),
-                                toggleState: storage.toggleState
+                                bgColor: $('#cp3 input').val()
                             }
                         });
                         swal("Saved", "Your preferences have been saved.", "success");
@@ -496,21 +484,7 @@ chrome.storage.sync.get(null, function(storage) {
                     checkTimeInProgress();
                 });
                 var menus = ['Projects', 'My Work', 'Approvals', 'Notifications'];
-                reorderMenu(menus);
-                $('body').on('click', '.wf-list-group', function(e){
-	                e.stopPropagation();
-	                if(this===event.target){
-		                $(this).toggleClass('wf-list-group-closed');
-		                var edit_id = $(this).data('group');
-		                chrome.storage.sync.set({
-                            [edit_id]: {
-	                            bgColor: storage[edit_id].bgColor,
-                                toggleState: $(this).hasClass('wf-list-group-closed')
-                            }
-                        });
-                        console.log(storage[edit_id])
-	                }
-                });
+                reorderMenu(menus)
             }
 
             $('[data-load]').on('click', function() {
