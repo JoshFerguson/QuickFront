@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "QuickFront",
 	"description": "Easily get all your workfront notifications.",
-	"version": "1.2.5",
+	"version": "1.2.6",
 	"permissions": [
 		"storage",
 		"*://*/*",
