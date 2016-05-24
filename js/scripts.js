@@ -86,15 +86,14 @@ chrome.storage.sync.get(null, function(storage) {
                 if (data) {
                     var that = $('[data-project="' + pid + '"]');
                     (data.bgColor) ? that.css('border-left-color', data.bgColor): false;
-                    (data.bgColor) ? that.find('.progress-bar').css('background-color', data.bgColor): false;
+                    (data.bgColor) ? that.find('.item-bgColor').css('background-color', data.bgColor): false;
                 }
             });
         }
     }
 
     function progressBar(p) {
-        var h = p == 0 ? 'hide_opacity' : '';
-        return '<div class="progress ' + h + '"><span>' + p + '%</span><div class="progress-bar" role="progressbar" aria-valuenow="' + p + '" aria-valuemin="0" aria-valuemax="100" style="width:' + p + '%"></div></div>';
+        return '<div class="wf-progress"><div class="wf-progress-bar"><div class="wf-progress-indicator item-bgColor" style="width:'+p+'%"></div></div><div class="wf-progress-info">'+p+'%</div></div>';
     }
 
 
@@ -265,10 +264,10 @@ chrome.storage.sync.get(null, function(storage) {
                         var pbar = progressBar(task.percentComplete);
                         var html = '<div class="wf-list-item '+datClass+'" data-type="task" data-project="' + task.projectID + '">' +
                             '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
+                            '<button class="wf-btn wf-btn-done item-bgColor" data-toggle="popover" data-content=""><i class="zmdi zmdi-square-o"></i> Done</button>'+
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/task/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
-                            '<a href="edit.html?edit=' + task.projectID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
-                            //'<a href="upload.html?edit=' + task.projectID + '"><i class="zmdi zmdi-cloud-upload"></i></a>' +
+                            '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+storage[task.projectID].bgColor+'"></i>' +
                             '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
                             '<div class="tabConfirm"></div>' +
                             '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
@@ -301,10 +300,9 @@ chrome.storage.sync.get(null, function(storage) {
                         var pbar = progressBar(task.percentComplete);
                         var html = '<div class="wf-list-item '+datClass+'" data-type="project" data-project="' + task.ID + '">' +
                             '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
-                            '<div class="wf-item-icons">' +
+                            '<br /><div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/project/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
-                            '<a href="edit.html?edit=' + task.ID + '"><i class="zmdi zmdi-settings item-settings"></i></a>' +
-                            //'<a href="upload.html?edit=' + task.projectID + '"><i class="zmdi zmdi-cloud-upload"></i></a>' +
+                            '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+storage[task.ID].bgColor+'"></i>' +
                             '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
                             '<div class="tabConfirm"></div>' +
                             '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
@@ -441,38 +439,30 @@ chrome.storage.sync.get(null, function(storage) {
             });
 
         }
-        if (thispage() == "edit.html") {
-            var edit_id = getParameterByName('edit')
-            chrome.storage.sync.get(edit_id, function(val) {
-                wf.get('project/' + edit_id + '?fields=*', function(data) {
-                    console.log(data)
-                    var project = data.data;
-                    var optiins = {
-                        bgColor: '#eeeeee'
-                    };
-
-                    $('.progress').find('span').text(project.percentComplete + "%");
-                    $('.progress-bar').attr('aria-valuenow', project.percentComplete).css('width', project.percentComplete + "%")
-
-                    $('#cp3').colorpicker({
-                        color: (val[edit_id]) ? val[edit_id].bgColor : optiins.bgColor,
-                        format: 'hex'
-                    });
-                    $('#ptitle').text(project.name);
-
-                    $("#editProj").submit(function(event) {
-                        event.preventDefault();
-                        var form = $(this);
-                        chrome.storage.sync.set({
-                            [edit_id]: {
-                                bgColor: $('#cp3 input').val()
-                            }
-                        });
-                        swal("Saved", "Your preferences have been saved.", "success");
-                    });
+    }
+    
+    function hasToReload(){
+	    //Color Pickers
+	    $('.PJColorPicker').each(function(){
+            var that = $(this);
+            var id = that.closest('.wf-list-item').data('project');
+            var color = that.data('color') || "#eeeeee";
+            that.colorpicker({
+                color: color
+            }).on('changeColor', function(e) {
+	            that.closest('.wf-list-item').css('border-left-color', e.color.toHex());
+	            chrome.storage.sync.set({
+                	[id]: { bgColor: e.color.toHex() }
                 });
-            });
-        }
+	        });
+        });
+        checkTimeInProgress();
+        $('.wf-btn-done[data-toggle="popover"]').popover({
+	        html : true, 
+			content: function() {
+	        	return $('#wfdonePopover').html();
+			}
+	    });
     }
 
 
@@ -490,10 +480,10 @@ chrome.storage.sync.get(null, function(storage) {
             if (thispage() == "popup.html") {
                 var dft = $('#custmenu').find('.active > a').data('load');
                 populate[dft](function() {
-                    checkTimeInProgress();
+                    hasToReload();
                 });
                 var menus = ['Projects', 'My Work', 'Approvals', 'Notifications'];
-                reorderMenu(storage.MenuOrder || menus)
+                reorderMenu(storage.MenuOrder || menus);
             }
 
             $('[data-load]').on('click', function() {
@@ -502,7 +492,7 @@ chrome.storage.sync.get(null, function(storage) {
                 $(this).parent().addClass('active');
                 var apac = $(this).data('load');
                 populate[apac](function() {
-                    checkTimeInProgress();
+                    hasToReload();
                 });
             });
             
@@ -511,6 +501,9 @@ chrome.storage.sync.get(null, function(storage) {
 			    $('.wf-list-item').each(function(){
 			         var $this = $(this);
 			         var con = $this.text().toLowerCase();
+			         if (con.match("^$")) {
+					   shortCodeSearch(con)
+					 }
 			         if(con.indexOf(query) === -1)
 			             $this.fadeOut();
 			        else $this.fadeIn();
@@ -520,10 +513,21 @@ chrome.storage.sync.get(null, function(storage) {
         } //Is isConfiged
         pageActions();
         $('.navbar').dblclick(function() {
-            var w = $(document).width(),
-                h = $(document).height();
-            var sw = screen.width - 530;
-            window.open('chrome-extension://nfinbnedefiaammkllfcmcecjbhjobii/popup.html', 'Quick Front', 'width=' + w + ', height=' + h + ' top=75, left=' + sw);
+            swal({
+	            title: "New Window?",   
+	            text: "Do you want to open this in a new window?",   
+	            type: "info",   
+	            showCancelButton: true,     
+	            confirmButtonText: "Yes",   
+	            cancelButtonText: "Cancel",   
+	            closeOnConfirm: true,   
+	            closeOnCancel: true 
+	        },function(isConfirm){ 
+		        if (isConfirm) { 
+					var sw = screen.width - 530;
+			        window.open('popup.html', 'Quick Front', 'width=500, height=601, top=75, left=' + sw);  
+			    }
+			});
             return false;
         });
     });

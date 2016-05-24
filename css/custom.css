@@ -107,12 +107,12 @@ a:focus{
 	display: inline-block;
 	padding: 6px 10px;
 	background: #f8f8f8;
-	border-bottom: 1px solid white;
 	border-left: 4px solid #e6e6e6;
 	border-radius: 0px;
 	color: #444444;
 	transition: all 0.7s ease;
 	position: relative;
+	margin-bottom: 2px;
 }
 .wf-list-item:hover{
 	text-decoration: none;
@@ -211,25 +211,34 @@ a:focus{
 }
 
 
-.progress{
-	box-shadow: none;
-	background: transparent;
+.wf-progress{
+	width: 100%;
+	height: 20px;
 	position: relative;
-	border-radius: 0px;
+	margin: 2px 0px;
 }
-.progress span{
+.wf-progress-bar{
+	background-color: #ecf0f1;
+	height: 5px;
+	width: 100%;
 	position: absolute;
-	display: block;
-	width: 50px;
-	height: 30px;
-	font-size: 12px;
-	top: 5px;
+	top: 3px;
 	left: 0px;
 }
-.progress-bar{
-	background-color: #f57f29;
-	border: none;
+.wf-progress-indicator{
 	height: 5px;
+	background: #ff8200;
+}
+.wf-progress-info{
+	position: absolute;
+	right: 20px;
+	top: -5px;
+	font-size: 12px;
+	background: #ecf0f1;
+	border: 1px solid #c4c6c7;
+	border-radius: 4px;
+	padding: 1px 5px;
+	font-family: sans-serif;
 }
 
 .hide_opacity{
@@ -265,6 +274,45 @@ a:focus{
     margin-top: -15px;
 }
 
+
+.wf-btn{
+	display: inline-block;
+	padding: 4px 10px;
+	margin: 2px;
+	color: #ffffff;
+	text-align: center;
+	background: #ff8200;
+	border: none;
+	transition: all 0.3s ease;
+}
+.wf-btn:hover, .wf-btn:active, .wf-btn:focus{
+	opacity: 0.8;
+	text-decoration: none;
+	color: #ffffff;
+	outline: none;
+}
+
+
+#wfdonePopover{
+	display: none;
+}
+
+.popover-content button{
+	border: none;
+	display: block;
+	padding: 5px;
+	width: 150px;
+	background: #ffffff;
+	border: none;
+	text-align: left;
+	transition: all 0.3s ease;
+}
+.popover-content button:hover{
+	background: #ecf0f1;
+}
+.popover-content button:first-child{
+	border-bottom: 1px #ecf0f1 solid;
+}
 
 
 body.dragging, body.dragging * {
