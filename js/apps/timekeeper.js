@@ -10,10 +10,25 @@ chrome.storage.sync.get(null, function(storage) {
 	});
 	
 	function wfTime(name, humanTime){
+		var msToTime = function(s) {
+
+	        function addZ(n) {
+	            return (n < 10 ? '0' : '') + n;
+	        }
+	
+	        var ms = s % 1000;
+	        s = (s - ms) / 1000;
+	        var secs = s % 60;
+	        s = (s - secs) / 60;
+	        var mins = s % 60;
+	        var hrs = (s - mins) / 60;
+	
+	        return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs);
+	    }
 		var date1 = new Date(localStorage.getItem(name));
 		var date2 = new Date();
 		var timeDiff = Math.abs(date2.getTime() - date1.getTime());
-		return (timeDiff/3600000).toFixed(2);
+		return (humanTime) ? msToTime(timeDiff) : (timeDiff/3600000).toFixed(2);
 	}
 	
 	function tabConfirm(tab, html){
@@ -21,9 +36,9 @@ chrome.storage.sync.get(null, function(storage) {
 		$(tab).closest('.wf-list-item').find('.tabConfirm').html(html);
 	}
 	
-	function timekeeperConfirm(_id, kind, time){
+	function timekeeperConfirm(_id, kind, time, name){
 		var tab = $('[data-timekeeper="'+_id+'"]');
-		var html = '<input class="tabConfirmTime" value="'+time+'"><button type="button" class="btn-close-confirm saveTime btn btn-success">Confirm</button><button type="button" class="btn-close-confirm btn btn-default">Discard</button>';
+		var html = '<input class="tabConfirmTime" data-ht="'+wfTime(name, true)+'" value="'+time+'"><button type="button" class="btn-close-confirm saveTime btn btn-success">Confirm</button><button type="button" class="btn-close-confirm btn btn-default">Discard</button>';
 		tabConfirm(tab, html);
 		$('body').on('click', '.saveTime', function(){
 			if(kind=="task"){ kind = 'taskID'; }
@@ -54,7 +69,7 @@ chrome.storage.sync.get(null, function(storage) {
 			that.removeClass('wf_timekeeper_pulse');
 			that.next('.timeKeeper-time').text('');
 			that.empty();
-			timekeeperConfirm(_id, _kind, elapsed);
+			timekeeperConfirm(_id, _kind, elapsed, name);
 			localStorage.removeItem(name);
 			$('#picons').find('#wf_timekeeper_header').remove();
 			$('.timeKeeper').show();

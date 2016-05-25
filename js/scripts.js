@@ -3,6 +3,7 @@ var searchVar = {
     complete: "$done",
     duePast: "$past"
 }
+var apiVersion = "5.0";
 chrome.storage.sync.get(null, function(storage) {
 
     var ba = chrome.browserAction;
@@ -151,8 +152,8 @@ chrome.storage.sync.get(null, function(storage) {
     }
 
     function timeInProgressTicker() {
-        setInterval(function() {
-            $.each(localStorage, function(key, val) {
+	    var updater = function(){
+		    $.each(localStorage, function(key, val) {
                 if (key.indexOf('wf_timekeeper_') > -1) {
                     var date1 = new Date(localStorage.getItem(key)),
                         date2 = new Date();
@@ -160,7 +161,9 @@ chrome.storage.sync.get(null, function(storage) {
                     $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').next('.timeKeeper-time').text(msToTime(timeDiff))
                 }
             });
-        }, 1000)
+	    }
+	    updater();
+        setInterval(function() { updater(); }, 1000);
     }
 
     function ia(arr, ent) {
@@ -188,14 +191,25 @@ chrome.storage.sync.get(null, function(storage) {
 	}
 	
 	function isPast(date, output) {
-		var selectedDate = new Date(date.replace('T', ' '));
-		var now = new Date();
-		if (selectedDate < now) {
-			return output[0] || true;
+		if(date != null && date.length){
+			var selectedDate = new Date(date.replace('T', ' '));
+			var now = new Date();
+			if (selectedDate < now) {
+				return output[0] || true;
+			}else{
+				return output[1];
+			}
 		}else{
-			return output[1];
+			return date;
 		}
 	}
+	
+	$.fn.focusToEnd = function() {
+	   return this.each(function() {
+	       var v = $(this).val();
+	       $(this).focus().val("").val(v);
+	   });
+	};
 
     var wf = {
         myprojectsarray: [],
@@ -204,7 +218,7 @@ chrome.storage.sync.get(null, function(storage) {
                 var wfdatacacheInt = setInterval(function() {
                     wfdatacacheTimer++;
                 }, 1000);
-                $.getJSON("https://" + storage.wfdomain + ".attask-ondemand.com/attask/api/v5.0/" + api, function(data) {
+                $.getJSON("https://" + storage.wfdomain + ".attask-ondemand.com/attask/api/v"+apiVersion+"/" + api, function(data) {
                     jQuery.isFunction(fn) ? fn(data) : false
                     wfdatacache(data, api, wfdatacacheInt);
                 }).error(function() {
@@ -258,12 +272,12 @@ chrome.storage.sync.get(null, function(storage) {
 		    });
         }
     }
-
+    //https://pcci.attask-ondemand.com/attask/api/v5.0/task/5720c4e6001455d0cf63cd8256a9e048?fields=*
     var populate = {
         mywork: function(fn, print) {
             var wfcontent = $('#wfcontent');
             wfcontent.empty();
-            wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate,color,objCode', function(data) {
+            wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate,color,objCode,assignmentsListString', function(data) {
                 var sorted = data.data.sort(srt({
                     key: 'projectID',
                     string: true
@@ -274,12 +288,14 @@ chrome.storage.sync.get(null, function(storage) {
                         var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
                         var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
+                        var doneTip = (task.assignmentsListString.indexOf(",") >= 0) ? 'data-toggle="popover" data-content=""' : '';
+                        var bgColor = ( storage.hasOwnProperty(task.projectID) ) ? storage[task.projectID].bgColor : "#eeeeee";
                         var html = '<div class="wf-list-item '+datClass+'" data-obj-code="'+task.objCode+'" data-type="task" data-project="' + task.projectID + '" data-task="' + task.ID + '">' +
                             '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
-                            '<button class="wf-btn wf-btn-done item-bgColor" data-toggle="popover" data-content=""><i class="zmdi zmdi-square-o"></i> Done</button>'+
+                            '<button class="wf-btn wf-btn-done item-bgColor" '+doneTip+'><i class="zmdi zmdi-square-o"></i> Done</button>'+
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/task/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
-                            '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+storage[task.projectID].bgColor+'"></i>' +
+                            '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+bgColor+'"></i>' +
                             '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
                             '<div class="tabConfirm"></div>' +
                             '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
@@ -300,33 +316,35 @@ chrome.storage.sync.get(null, function(storage) {
             });
         },
         projects: function(fn) {
-            this.mywork(function() {
-                var wfcontent = $('#wfcontent');
-                wfcontent.empty();
-                var projs = (wf.myprojectsarray).join();
-                wf.get('project/search?map=true&id=' + projs + '&fields=percentComplete,plannedCompletionDate', function(data) {
-                    for (var i = 0; i < data.data.length; i++) {
-                        var task = data.data[i];
-                        var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
-                        var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
-                        var pbar = progressBar(task.percentComplete);
-                        var html = '<div class="wf-list-item '+datClass+'" data-type="project" data-project="' + task.ID + '">' +
-                            '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
-                            '<br /><div class="wf-item-icons">' +
-                            '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/project/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
-                            '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+storage[task.ID].bgColor+'"></i>' +
-                            '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
-                            '<div class="tabConfirm"></div>' +
-                            '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
-                            '</div>' +
-                            '</div>';
-                        apply_settings(task.ID);
-                        wfcontent.append(html);
-                        baCount = i;
-                    }
-                    jQuery.isFunction(fn) ? fn(data) : false
-                });
-            }, false);
+            var wfcontent = $('#wfcontent');
+            wfcontent.empty();
+            wf.get('project/search?projectUserIDs='+storage.userID+'&status=CUR&fields=percentComplete,plannedCompletionDate&map=true', function(data) {
+                var sorted = data.data.sort(srt({
+                    key: 'plannedCompletionDate',
+                    string: true
+                }, false));
+                for (var i = 0; i < sorted.length; i++) {
+                    var task = sorted[i];
+                    var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
+                    var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
+                    var pbar = progressBar(task.percentComplete);
+                    var bgColor = ( storage.hasOwnProperty(task.ID) ) ? storage[task.ID].bgColor : "#eeeeee";
+                    var html = '<div class="wf-list-item '+datClass+'" data-type="project" data-project="' + task.ID + '">' +
+                        '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
+                        '<br /><div class="wf-item-icons">' +
+                        '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/project/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
+                        '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+bgColor+'"></i>' +
+                        '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
+                        '<div class="tabConfirm"></div>' +
+                        '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
+                        '</div>' +
+                        '</div>';
+                    apply_settings(task.ID);
+                    wfcontent.append(html);
+                    baCount = i;
+                }
+                jQuery.isFunction(fn) ? fn(data) : false
+            });
         },
         approvals: function(fn) {
             var wfcontent = $('#wfcontent');
@@ -415,16 +433,13 @@ chrome.storage.sync.get(null, function(storage) {
             preffForm.find('[name="refreshrate"]').val(storage.refreshrate || 60000);
 
             $('#resetConfig').on('click', function() {
-                chrome.storage.sync.set({
-                    "fname": null,
-                    "lname": null,
-                    "username": null,
-                    "password": null,
-                    "wfdomain": null,
-                    "refreshrate": null,
-                    "isConfiged": null
-                });
-                window.location = "welcome.html";
+				var toRemove = [];
+				chrome.storage.sync.get( function(Items) {
+				    $.each(Items, function(index, value){ toRemove.push(index); });
+				    chrome.storage.sync.remove(toRemove, function(Items) {
+				        window.location = "welcome.html";
+				    }); 
+				});
             });
 
             $("input[type='checkbox']").bootstrapSwitch({
@@ -449,8 +464,11 @@ chrome.storage.sync.get(null, function(storage) {
                     _super($item, container);
                 }
             });
-
         }
+        if (thispage() == "do.html") {
+	        $('textarea').focusToEnd()
+	    }
+        
     }
     
     function hasToReload(){
@@ -475,6 +493,13 @@ chrome.storage.sync.get(null, function(storage) {
 	        	return $('#wfdonePopover').html();
 			}
 	    });
+	    $('body').on('click', function (e) {
+		    $('[data-toggle="popover"]').each(function () {
+		        if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+		            $(this).popover('hide');
+		        }
+		    });
+		});
     }
 
 
@@ -500,7 +525,7 @@ chrome.storage.sync.get(null, function(storage) {
 				$('body').on('click', '[data-done]', function(){
 					wf.remove($(this).closest('.wf-list-item'), $(this).data('done'), function(that, ac, remove){
 						console.log( that.data('obj-code') )
-						//remove();
+						remove();
 					});
 				});
             }
@@ -517,6 +542,7 @@ chrome.storage.sync.get(null, function(storage) {
             
 			$('#finder').keyup(function(e){
 			    var query = $.trim($(this).val()).toLowerCase();
+			    if(query=="do()"){ window.location = "do.html"; }
 			    $('.wf-list-item').each(function(){
 			         var $this = $(this);
 			         var con = $this.text().toLowerCase();

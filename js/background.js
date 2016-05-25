@@ -50,12 +50,14 @@ chrome.storage.sync.get(null, function(storage) {
 		xmlhttp.send(null);
 	}
 	var notifys = 0;
+	var lastcheck = 0;
 	function getNotifus(){
 		wfgetJson(apiPath+'notifications?fields=note,acknowledgementID', function(data){
 			for(var i = 0; i<50; i++){
 				if(data.data[i].note && !data.data[i].acknowledgementID){
 					notifys++;
 				}
+				lastcheck = i;
 			}
 			if(notifys > storage.BadgeText){
 				pushNotification("You have "+notifys+" new notification(s)");
