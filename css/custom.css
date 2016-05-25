@@ -71,7 +71,12 @@ a, .a{
 }
 
 .navbar-brand{
-	padding: 5px 15px;
+	padding: 0px;
+	margin: 0px;
+}
+.navbar-brand img{
+	height: 50px;
+	width: 50px;
 }
 
 .noContentText{
@@ -182,13 +187,13 @@ a:focus{
     top: 0px;
     left: -358px;
     text-align: left;
-    border-bottom: 1px solid #e7e7e7;
 }
 
 .wf-item-icons i{
 	float: right;
 	margin: 0px 3px;
 	opacity: 0.5;
+	display: block;
 }
 
 .wf-item-icons i:hover{
@@ -302,6 +307,7 @@ a:focus{
 	display: block;
 	padding: 5px;
 	width: 150px;
+	padding-left: 10px;
 	background: #ffffff;
 	border: none;
 	text-align: left;

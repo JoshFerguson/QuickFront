@@ -95,6 +95,7 @@ chrome.storage.sync.get(null, function(storage) {
     function progressBar(p) {
         return '<div class="wf-progress"><div class="wf-progress-bar"><div class="wf-progress-indicator item-bgColor" style="width:'+p+'%"></div></div><div class="wf-progress-info">'+p+'%</div></div>';
     }
+    
 
 
     function msToTime(s) {
@@ -244,6 +245,17 @@ chrome.storage.sync.get(null, function(storage) {
             var bar = "";
             bar += (ia(act, 'link')) ? "" : "";
             return bar;
+        },
+        remove: function(that, id, fn){
+	        that.animate({ 
+		        left:-500 
+		    }, 500, function(){
+			    setTimeout(function(){
+				    fn(that, id, function(){
+					    that.remove();
+				    });
+			    }, 500);
+		    });
         }
     }
 
@@ -251,7 +263,7 @@ chrome.storage.sync.get(null, function(storage) {
         mywork: function(fn, print) {
             var wfcontent = $('#wfcontent');
             wfcontent.empty();
-            wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate,color', function(data) {
+            wf.get('work?fields=name,projectID,assignedToID,percentComplete,plannedCompletionDate,color,objCode', function(data) {
                 var sorted = data.data.sort(srt({
                     key: 'projectID',
                     string: true
@@ -262,7 +274,7 @@ chrome.storage.sync.get(null, function(storage) {
                         var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
                         var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
-                        var html = '<div class="wf-list-item '+datClass+'" data-type="task" data-project="' + task.projectID + '">' +
+                        var html = '<div class="wf-list-item '+datClass+'" data-obj-code="'+task.objCode+'" data-type="task" data-project="' + task.projectID + '" data-task="' + task.ID + '">' +
                             '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
                             '<button class="wf-btn wf-btn-done item-bgColor" data-toggle="popover" data-content=""><i class="zmdi zmdi-square-o"></i> Done</button>'+
                             '<div class="wf-item-icons">' +
@@ -450,10 +462,10 @@ chrome.storage.sync.get(null, function(storage) {
             that.colorpicker({
                 color: color
             }).on('changeColor', function(e) {
-	            that.closest('.wf-list-item').css('border-left-color', e.color.toHex());
 	            chrome.storage.sync.set({
                 	[id]: { bgColor: e.color.toHex() }
                 });
+                apply_settings(id);
 	        });
         });
         checkTimeInProgress();
@@ -484,6 +496,13 @@ chrome.storage.sync.get(null, function(storage) {
                 });
                 var menus = ['Projects', 'My Work', 'Approvals', 'Notifications'];
                 reorderMenu(storage.MenuOrder || menus);
+                
+				$('body').on('click', '[data-done]', function(){
+					wf.remove($(this).closest('.wf-list-item'), $(this).data('done'), function(that, ac, remove){
+						console.log( that.data('obj-code') )
+						//remove();
+					});
+				});
             }
 
             $('[data-load]').on('click', function() {
