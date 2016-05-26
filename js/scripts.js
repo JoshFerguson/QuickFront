@@ -9,6 +9,7 @@ chrome.storage.sync.get(null, function(storage) {
     var ba = chrome.browserAction;
     var baCount = 0;
     var wfdatacacheTimer = 0;
+    var hiddenTaskItems = (storage.hiddenItems) ? storage.hiddenItems : [];
 
     function setAllRead() {
         ba.setBadgeBackgroundColor({
@@ -318,7 +319,7 @@ chrome.storage.sync.get(null, function(storage) {
         projects: function(fn) {
             var wfcontent = $('#wfcontent');
             wfcontent.empty();
-            wf.get('project/search?projectUserIDs='+storage.userID+'&status=CUR&fields=percentComplete,plannedCompletionDate&map=true', function(data) {
+            wf.get('project/search?projectUserIDs='+storage.userID+'&status=CUR&fields=percentComplete,plannedCompletionDate', function(data) {
                 var sorted = data.data.sort(srt({
                     key: 'plannedCompletionDate',
                     string: true
