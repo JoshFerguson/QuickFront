@@ -502,6 +502,30 @@ chrome.storage.sync.get(null, function(storage) {
 		    });
 		});
     }
+    
+    function extendedItem(parnet){
+	    parnet.append('<div class="wf-item-extended-content"></div>');
+		var ext = parnet.find('.wf-item-extended-content');
+		var form = '<ul class="wf-item-extended-menu"><li class="active">Updates</li><li>Documents</li><li>Details</li></ul>'+
+					'<div class="wf-item-extended-form">'+
+						'<textarea name="wf-update-text"></textarea>'+
+						'<select name="wf-update-status">'+
+							'<option>Going Smoothly</option>'+
+							'<option>Some Concerns</option>'+
+							'<option>Major Roadblocks</option>'+
+						'</select>'+
+						'<select name="wf-update-state">'+
+							'<option>New</option>'+
+							'<option>In Progress</option>'+
+							'<option>Checking</option>'+
+							'<option>Pending IT Support</option>'+
+							'<option>Waiting For</option>'+
+							'<option>Complete Pending Approval</option>'+
+						'</select>'+
+						'<button name="wf-let-it-go" class="wf-btn wf-btn-blue">Update</button><br />'+	
+					'</div>';
+		ext.append(form);
+    }
 
 
     $(document).ready(function() {
@@ -525,10 +549,21 @@ chrome.storage.sync.get(null, function(storage) {
                 
 				$('body').on('click', '[data-done]', function(){
 					wf.remove($(this).closest('.wf-list-item'), $(this).data('done'), function(that, ac, remove){
-						console.log( that.data('obj-code') )
 						remove();
 					});
 				});
+				
+				$('body').on('click', '.wf-list-item-details-btn', function(){
+					var parnet = $(this).closest('.wf-list-item');
+					parnet.toggleClass('wf-list-item-extended');
+					if(parnet.find('.wf-item-extended-content').length > 0){
+						parnet.find('.wf-item-extended-content').remove();
+					}else{
+						extendedItem(parnet);
+						$('select').selectpicker();
+					}
+				});
+
             }
 
             $('[data-load]').on('click', function() {

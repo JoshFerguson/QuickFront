@@ -53,19 +53,26 @@ chrome.storage.sync.get(null, function(storage) {
 	var lastcheck = 0;
 	function getNotifus(){
 		wfgetJson(apiPath+'notifications?fields=note,acknowledgementID', function(data){
+			var notes = data.data;
 			for(var i = 0; i<50; i++){
-				if(data.data[i].note && !data.data[i].acknowledgementID){
+				if(notes[i].note && !notes[i].acknowledgementID){
 					notifys++;
 				}
-				lastcheck = i;
 			}
-			if(notifys > storage.BadgeText){
-				pushNotification("You have "+notifys+" new notification(s)");
-				setUnread(notifys);
+			var num = (notifys-lastcheck)
+			if(num>lastcheck){
+				pushNotification("You have "+num+" new notification(s)");
+				//pushNotification('Last: '+lastcheck+', New: '+notifys)
+				setUnread(num);
+				lastcheck = num;
 			}
 			notifys=0;
 		});
 	}
+	
+/*
+
+*/
 	
 	
 		if(storage.autosignin){
@@ -78,10 +85,11 @@ chrome.storage.sync.get(null, function(storage) {
 				
 				pushNotification("You have been automatedly logged into workfront.");
 				
-				(storage.sendpushnotify) ?  getNotifus() : false;
-				
-				if(storage.refreshrate){
-					setInterval(function(){ getNotifus() }, (storage.refreshrate || 60000));
+				if(storage.sendpushnotify){
+					getNotifus()
+					setInterval(function(){ 
+						(storage.sendpushnotify) ?  getNotifus() : false; 
+					},(storage.refreshrate || 60000));
 				}
 				
 			});
