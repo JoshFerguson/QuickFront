@@ -6,7 +6,7 @@
 
 body{
 	min-width: 500px;
-	height: 560px;
+	height: 680px;
 	padding: 0px;
 	padding-top: 52px;
 	overflow: hidden;
@@ -14,7 +14,7 @@ body{
 
 section {			/* Change width and height to own preferences */
 	width: 100%;
-	height: 550px;
+	height: 680px; /* QickEdit :: revert to 550px */
 	overflow-x: auto;
 }
 
@@ -140,8 +140,8 @@ a:focus{
 	padding-top: 3px;
 }
 
+/*
 .date-pasted{
-	color: #f8f8f8;	
 	background: #f8f8f8;
 	background: -moz-linear-gradient(left,  #f8f8f8 0%, #f8f8f8 90%, #ffa993 100%, #ffa993 100%);
 	background: -webkit-linear-gradient(left,  #f8f8f8 0%,#f8f8f8 90%,#ffa993 100%,#ffa993 100%);
@@ -156,17 +156,23 @@ a:focus{
 	background: linear-gradient(to right,  #f8f8f8 0%,#f8f8f8 90%,#2ecc71 100%,#2ecc71 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f8f8', endColorstr='#2ecc71',GradientType=1 );
 }
+*/
 
 
 
 
 .wf-list-item-extended{
 	min-height: 250px;
+	padding-bottom: 25px;
 }
 .wf-item-extended-content{
 	width: 100%;
 	border-top: 1px white solid;
 	margin-top: 20px;
+}
+.wf-item-extended-overflow{
+	max-height: 200px;
+	overflow-y: auto;
 }
 .wf-item-extended-menu{
 	display: block;
@@ -188,7 +194,7 @@ a:focus{
 
 .wf-item-extended-form textarea{
 	width: 100%;
-	height: 50px;
+	height: 115px;
 	resize: none;
 	border: 1px rgba(165, 165, 165, 0.20) solid;
 	margin-bottom: 10px;
@@ -214,6 +220,23 @@ a:focus{
 .wf-item-extended-form .bootstrap-select .dropdown-toggle:focus{
 	outline: none !important;
 }
+
+.wf-item-extended-document{
+	width: 100%;
+    height: 40px;
+    background: #c2dcee;
+    border: 1px #b1cde0 solid;
+    padding: 10px;
+    color: #ffffff;
+    border-radius: 1px;
+    margin-bottom: 4px;
+}
+.wf-item-extended-document:hover{
+	opacity: 0.8;
+	cursor: pointer;
+}
+
+
 
 
 
@@ -271,6 +294,7 @@ a:focus{
 	margin-left: 20px;
 	cursor: pointer;
 	transition: all 0.3s ease;
+	z-index: 999999;
 }
 .wf-list-item:hover .wf-list-item-details-btn{
 	opacity: 0.5;
@@ -293,7 +317,7 @@ a:focus{
 }
 .wf-progress-indicator{
 	height: 5px;
-	background: #ff8200;
+	background: #80adce;
 }
 .wf-progress-info{
 	position: absolute;
@@ -348,11 +372,11 @@ a:focus{
 
 .wf-btn{
 	display: inline-block;
-	padding: 4px 10px;
+	padding: 4px 14px;
 	margin: 2px;
 	color: #ffffff;
 	text-align: center;
-	background: #ff8200;
+	background: #80adce;
 	border: none;
 	transition: all 0.3s ease;
 	position: relative;
@@ -381,6 +405,11 @@ a:focus{
 .wf-btn-blue{
 	background: #80adce;
 	border-bottom: 2px #678ba5 solid;
+}
+
+.wf-btn-tad-bigger{
+	margin: 0px;
+	padding: 4px 16px;
 }
 
 #wfdonePopover{
@@ -432,6 +461,7 @@ ol.MenuOrder li{
 	background: #eeeeee;
 	border: 1px solid silver;
 	border-radius: 3px;
+	cursor: move;
 }
 
 ol.MenuOrder li.placeholder {
@@ -476,3 +506,92 @@ ol.MenuOrder li.placeholder:before {
 ::-webkit-scrollbar { width: 0px; display: none;  }
 ::-webkit-scrollbar-track { display: none; }
 ::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb:window-inactive  { background: transparent; display: none;  }
+
+
+/* unslider */
+.unslider {
+/*     overflow: auto; */
+    margin: 0;
+    padding: 0
+}
+.unslider-wrap {
+    position: relative
+}
+.unslider-wrap.unslider-carousel>li {
+    float: left
+}
+.unslider-vertical>ul {
+    height: 100%
+}
+.unslider-vertical li {
+    float: none;
+    width: 100%
+}
+.unslider-fade {
+    position: relative
+}
+.unslider-fade .unslider-wrap li {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    z-index: 8;
+    display: none;
+}
+
+.unslider-fade .unslider-wrap li.unslider-active {
+    z-index: 10;
+    display: block;
+}
+
+.unslider-wrap li[data-pos]{
+	opacity: 0;
+}
+.unslider-wrap li[data-pos].unslider-active{
+	opacity: 1;
+}
+
+.unslider li,
+.unslider ol,
+.unslider ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none
+}
+.unslider-arrow {
+    position: absolute;
+    left: 20px;
+    z-index: 2;
+    cursor: pointer
+}
+.unslider-arrow.next {
+    left: auto;
+    right: 20px
+}
+
+.unslider-nav ol {
+  list-style: none;
+  text-align: center;
+}
+.unslider-nav ol li {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 4px;
+  background: transparent;
+  border-radius: 5px;
+  overflow: hidden;
+  text-indent: -999em;
+  border: 2px solid #fff;
+  cursor: pointer;
+  display: none;
+}
+.unslider-nav ol li.unslider-active {
+  background: #fff;
+  cursor: default;
+}
+.wf-extended-slider{
+	overflow: visible !important;
+}
+/* unslider */

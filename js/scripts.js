@@ -137,13 +137,18 @@ chrome.storage.sync.get(null, function(storage) {
     function checkTimeInProgress() {
         $.each(localStorage, function(key, val) {
             if (key.indexOf('wf_timekeeper_') > -1) {
-                var that = $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').addClass('wf_timekeeper_pulse').html('<span class="hide">'+searchVar.time+'</span>');;
-                chrome.browserAction.setIcon({path: 'img/icon48-time.png'});
-                $('.timeKeeper').not(that).hide();
-                if ($('#wf_timekeeper_header').length == 0) {
-                    $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
+	            var key_id = key.replace('wf_timekeeper_', '');
+				var bool = (new Date().toDateString() === new Date(val).toDateString());
+                if(bool){
+					var that = $('[data-timekeeper="' + key_id + '"]').addClass('wf_timekeeper_pulse').html('<span class="hide">'+searchVar.time+'</span>');;
+					chrome.browserAction.setIcon({path: 'img/icon48-time.png'});
+					$('.timeKeeper').not(that).hide();
+					if ($('#wf_timekeeper_header').length == 0) {
+					    $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
+					}  
+                }else{
+	                localStorage.removeItem(key);
                 }
-
             }
         });
         timeInProgressTicker();
@@ -174,7 +179,7 @@ chrome.storage.sync.get(null, function(storage) {
     function reorderMenu(orderedArray) {
 	    var items = [];
 	    $('#custmenu li').each(function(){
-		    var t = $(this)
+		    var t = $(this);
 		    var it = {
 			    name: t.data('mo'),
 			    html: '<li data-mo="'+t.data('mo')+'">'+t.html()+'</li>'
@@ -182,13 +187,11 @@ chrome.storage.sync.get(null, function(storage) {
 		    items.push(it)
 	    });
 	    $('#custmenu').empty();
-	  
 	    $.each(orderedArray, function(key, val){
 		    var result = $.grep(items, function(e){ return e.name == val.name; });
 		    $('#custmenu').append(result[0].html);
 		    $('#custmenu').find('li:first').addClass('active')
-	    });
-	    
+	    }); 
 	}
 	
 	function isPast(date, output) {
@@ -283,13 +286,13 @@ chrome.storage.sync.get(null, function(storage) {
                     key: 'projectID',
                     string: true
                 }, true));
-                for (var i = 0; i < sorted.length; i++) {
+                for (var i = 0; i < sorted.length-1; i++) {
                     if (!print) {
                         var task = sorted[i];
                         var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
                         var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
-                        var doneTip = (task.assignmentsListString.indexOf(",") >= 0) ? 'data-toggle="popover" data-content=""' : '';
+                        var doneTip = (task.hasOwnProperty('assignmentsListString') && task.assignmentsListString.indexOf(",") > -1) ? 'data-toggle="popover" data-content=""' : '';
                         var bgColor = ( storage.hasOwnProperty(task.projectID) ) ? storage[task.projectID].bgColor : "#eeeeee";
                         var html = '<div class="wf-list-item '+datClass+'" data-obj-code="'+task.objCode+'" data-type="task" data-project="' + task.projectID + '" data-task="' + task.ID + '">' +
                             '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
@@ -382,7 +385,6 @@ chrome.storage.sync.get(null, function(storage) {
                 if (allNots.length > 0) {
                     setUnread(allNots.length);
                     wf.get('note/?fields=*&id=' + ids, function(data) {
-                        console.log(data)
                         for (var i = 0; i < data.data.length; i++) {
                             var note = data.data[i];
                             if (note.topNoteObjCode == "PROJ") {
@@ -420,7 +422,8 @@ chrome.storage.sync.get(null, function(storage) {
                     "wfdomain": form.find('[name="wfdomain"]').val(),
                     "refreshrate": form.find('[name="refreshrate"]').val()
                 });
-                swal("Saved", "Your preferences have been saved.", "success");
+                //swal("Saved", "Your preferences have been saved.", "success");
+                window.location = "popup.html";
             });
             var preffForm = $("#prefform");
 
@@ -504,27 +507,61 @@ chrome.storage.sync.get(null, function(storage) {
     }
     
     function extendedItem(parnet){
+	    var this_id = parnet.find('.timeKeeper').attr('data-timekeeper');
+	    console.log(this_id)
 	    parnet.append('<div class="wf-item-extended-content"></div>');
 		var ext = parnet.find('.wf-item-extended-content');
-		var form = '<ul class="wf-item-extended-menu"><li class="active">Updates</li><li>Documents</li><li>Details</li></ul>'+
-					'<div class="wf-item-extended-form">'+
-						'<textarea name="wf-update-text"></textarea>'+
-						'<select name="wf-update-status">'+
-							'<option>Going Smoothly</option>'+
-							'<option>Some Concerns</option>'+
-							'<option>Major Roadblocks</option>'+
-						'</select>'+
-						'<select name="wf-update-state">'+
-							'<option>New</option>'+
-							'<option>In Progress</option>'+
-							'<option>Checking</option>'+
-							'<option>Pending IT Support</option>'+
-							'<option>Waiting For</option>'+
-							'<option>Complete Pending Approval</option>'+
-						'</select>'+
-						'<button name="wf-let-it-go" class="wf-btn wf-btn-blue">Update</button><br />'+	
-					'</div>';
-		ext.append(form);
+		var form = '<ul class="wf-item-extended-menu"><li data-un="0%" data-pos="0" class="active">Updates</li><li data-un="-100%" data-pos="1">Documents</li><li data-un="-200%" data-pos="2">Details</li></ul>';
+		var extention = form+'<div class="wf-extended-slider"><ul>';
+		
+			extention += '<li data-pos="0"><div class="wf-item-extended-form">'+
+							'<textarea name="wf-update-text"></textarea>'+
+							'<select name="wf-update-status">'+
+								'<option>Going Smoothly</option>'+
+								'<option>Some Concerns</option>'+
+								'<option>Major Roadblocks</option>'+
+							'</select>'+
+							'<select name="wf-update-state">'+
+								'<option>New</option>'+
+								'<option>In Progress</option>'+
+								'<option>Checking</option>'+
+								'<option>Pending IT Support</option>'+
+								'<option>Waiting For</option>'+
+								'<option>Complete Pending Approval</option>'+
+							'</select>'+
+							'<button name="update-txt" class="wf-btn wf-btn-blue wf-btn-tad-bigger">Update</button><br />'+
+						'</div></li>';
+						
+			extention += '<li data-pos="1"><div class="wf-item-extended-form wf-item-extended-overflow">'+
+							'<div class="wf-item-extended-document">Document Name</div>'+
+							'<div class="wf-item-extended-document">Document Name</div>'+
+						'</div></li>';
+						
+			extention += '<li data-pos="2"><div class="wf-item-extended-form wf-item-extended-overflow">'+
+							'<div class="wf-item-extended-para">Blah Blah Blah, Blah Blah, Blah Blah Blah Blah Blah</div>'+
+						'</div></li>';
+		
+		extention += '</ul></div>';
+		
+		
+		ext.append(extention);
+		jQuery(document).ready(function($) {
+			$('.wf-extended-slider').unslider({
+				nav: false,
+				arrows: false
+			});
+			$('body').on('click', '.wf-item-extended-menu li', function(){
+				var move = $(this).data('un');
+				var pos = $(this).data('pos');
+				$('.wf-item-extended-menu li').removeClass('active');
+				$(this).addClass('active');
+				$('.unslider-carousel').find('.unslider-active').removeClass('unslider-active');
+				$('.unslider-carousel').find('li[data-pos="'+pos+'"]').addClass('unslider-active');
+				$('.unslider-carousel').animate({
+					left: move
+				}, 300);
+			});
+		});
     }
 
 
@@ -533,9 +570,15 @@ chrome.storage.sync.get(null, function(storage) {
         if (!storage.isConfiged) {
             window.location = "welcome.html";
         } else {
+	        var ajaxStartLoader;
             $(document).ajaxStart(function() {
                 $('#pageloading').show();
+                ajaxStartLoader = setTimeout(function() { 
+	            	$('#pageloading').hide();
+	            	window.location = "err.html?e=ajaxTimeout";
+	            }, storage.timeout || 10000); 
             }).ajaxStop(function() {
+	            clearTimeout(ajaxStartLoader)
                 $('#pageloading').hide();
             });
 
@@ -544,8 +587,8 @@ chrome.storage.sync.get(null, function(storage) {
                 populate[dft](function() {
                     hasToReload();
                 });
-                var menus = ['Projects', 'My Work', 'Approvals', 'Notifications'];
-                reorderMenu(storage.MenuOrder || menus);
+                storage.MenuOrder = (storage.MenuOrder) ? storage.MenuOrder : [{ name:"Projects",html:'<li data-mo="Projects"><a href="#"data-load="projects"><span>Projects</span></a></li>' },{ name:"My Work",html:'<li data-mo="My Work"><a href="#"data-load="mywork"><span>MyWork</span></a></li>' },{ name:"Approvals",html:'<li data-mo="Approvals"><a href="#"data-load="approvals"><span>Approvals</span></a></li>' },{ name:"Notifications",html:'<li data-mo="Notifications"><a href="#"data-load="notifications"><iclass="zmdi zmdi-notifications"></i></a></li>' }];
+                reorderMenu(storage.MenuOrder);
                 
 				$('body').on('click', '[data-done]', function(){
 					wf.remove($(this).closest('.wf-list-item'), $(this).data('done'), function(that, ac, remove){
