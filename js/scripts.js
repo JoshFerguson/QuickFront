@@ -632,6 +632,36 @@ chrome.storage.sync.get(null, function(storage) {
 			             $this.fadeOut();
 			        else $this.fadeIn();
 			    });
+			}).on('focus', function(){
+				$('#wfsearch-add').show();
+			}).on('blur', function(){
+				if(this.value.length===0){
+					$('#wfsearch-add').hide();
+				}
+			});
+			
+			$('#wfsearch-favs').on('click', function(event){
+				var btn = $(this);
+				btn.find('ul').toggle();
+				btn.toggleClass('focus');
+				$('#finder').val( (event.target.nodeName=="LI") ? $(event.target).text() : "" ).trigger('keyup');
+			});
+			
+			
+			var searchMarks = (localStorage.getItem('searchMarks')) ? localStorage.getItem('searchMarks').split(',') : [];
+			console.log(searchMarks)
+			function searchMarksPrep(){
+				if(searchMarks.length>0){
+					$.each(searchMarks, function(key, val){
+						$('#wfsearch-favs').find('ul').append('<li>'+val+'</li>');
+					});
+				}
+			}
+			searchMarksPrep()
+			$('#wfsearch-add').on('click', function(event){
+				searchMarks.push( $('#finder').val() );
+				localStorage.setItem('searchMarks', searchMarks);
+				searchMarksPrep()
 			});
             
         } //Is isConfiged

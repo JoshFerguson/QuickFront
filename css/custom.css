@@ -473,11 +473,75 @@ ol.MenuOrder li.placeholder:before {
   /** Define arrowhead **/
 }
 
+#wfsearch{
+	position: relative;
+}
+
 #finder{
 	width: 100%;
 	height: 40px;
 	border: none;
 	padding: 5px 15px;
+}
+
+#wfsearch button{
+	border: none;
+	border-radius: 200px;
+    background: transparent;
+	float: right;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    padding: 0px;
+    position: relative;
+}
+
+#wfsearch button:hover, 
+#wfsearch button.focus{
+	background: #80adce;
+	color: white;
+	cursor: pointer;
+}
+
+#wfsearch button:focus{
+	outline: none;
+}
+
+#wfsearch button ul{
+	display: none;
+    position: absolute;
+    list-style: none;
+    min-width: 200px;
+    background: white;
+    left: -177px;
+    z-index: 9;
+    border: 1px solid #a1a1a1;
+    border-radius: 7px;
+    margin: 0px;
+    padding: 5px;
+}
+
+#wfsearch button ul > li{
+	width: 100%;
+	height: 30px;
+	padding: 8px;
+	color: #a1a1a1;
+	text-align: left;
+}
+#wfsearch button ul > li:hover{
+	background: #ecf0f1;
+	cursor: pointer;
+}
+
+.wf-btn-group{
+	position: absolute;
+    right: 10px;
+    top: 8px;
+    background: white;
+}
+
+#wfsearch-add{
+	display: none;
 }
 
 #wfdo{
@@ -593,4 +657,4 @@ ol.MenuOrder li.placeholder:before {
 .wf-extended-slider{
 	overflow: visible !important;
 }
-/* unslider */
+/* unslider *
