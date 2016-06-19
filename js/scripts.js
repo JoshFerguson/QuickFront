@@ -10,6 +10,7 @@ chrome.storage.sync.get(null, function(storage) {
     var baCount = 0;
     var wfdatacacheTimer = 0;
     var hiddenTaskItems = (storage.hiddenItems) ? storage.hiddenItems : [];
+    var apply_settings_chache = [];
 
     function setAllRead() {
         ba.setBadgeBackgroundColor({
@@ -79,7 +80,6 @@ chrome.storage.sync.get(null, function(storage) {
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
-    var apply_settings_chache = [];
 
     function apply_settings(pid) {
         if (!apply_settings_chache[pid]) {
@@ -95,10 +95,12 @@ chrome.storage.sync.get(null, function(storage) {
     }
 
     function progressBar(p) {
-        return '<div class="wf-progress"><div class="wf-progress-bar"><div class="wf-progress-indicator item-bgColor" style="width:'+p+'%"></div></div><div class="wf-progress-info">'+p+'%</div></div>';
+	    if(typeof p !== "undefined"){
+		 	return '<div class="wf-progress"><div class="wf-progress-bar"><div class="wf-progress-indicator item-bgColor" style="width:' + p + '%"></div></div><div class="wf-progress-info">' + p + '%</div></div>';   
+	    }else{
+		    return '<div class="wf-progress" style="opacity:0"></div>';
+	    }
     }
-    
-
 
     function msToTime(s) {
 
@@ -137,17 +139,19 @@ chrome.storage.sync.get(null, function(storage) {
     function checkTimeInProgress() {
         $.each(localStorage, function(key, val) {
             if (key.indexOf('wf_timekeeper_') > -1) {
-	            var key_id = key.replace('wf_timekeeper_', '');
-				var bool = (new Date().toDateString() === new Date(val).toDateString());
-                if(bool){
-					var that = $('[data-timekeeper="' + key_id + '"]').addClass('wf_timekeeper_pulse').html('<span class="hide">'+searchVar.time+'</span>');;
-					chrome.browserAction.setIcon({path: 'img/icon48-time.png'});
-					$('.timeKeeper').not(that).hide();
-					if ($('#wf_timekeeper_header').length == 0) {
-					    $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
-					}  
-                }else{
-	                localStorage.removeItem(key);
+                var key_id = key.replace('wf_timekeeper_', '');
+                var bool = (new Date().toDateString() === new Date(val).toDateString());
+                if (bool) {
+                    var that = $('[data-timekeeper="' + key_id + '"]').addClass('wf_timekeeper_pulse').html('<span class="hide">' + searchVar.time + '</span>');;
+                    chrome.browserAction.setIcon({
+                        path: 'img/icon48-time.png'
+                    });
+                    $('.timeKeeper').not(that).hide();
+                    if ($('#wf_timekeeper_header').length == 0) {
+                        $('#picons').prepend('<span id="wf_timekeeper_header"><i class="zmdi zmdi-time wf_timekeeper_pulse"></i></span>');
+                    }
+                } else {
+                    localStorage.removeItem(key);
                 }
             }
         });
@@ -158,8 +162,8 @@ chrome.storage.sync.get(null, function(storage) {
     }
 
     function timeInProgressTicker() {
-	    var updater = function(){
-		    $.each(localStorage, function(key, val) {
+        var updater = function() {
+            $.each(localStorage, function(key, val) {
                 if (key.indexOf('wf_timekeeper_') > -1) {
                     var date1 = new Date(localStorage.getItem(key)),
                         date2 = new Date();
@@ -167,116 +171,120 @@ chrome.storage.sync.get(null, function(storage) {
                     $('[data-timekeeper="' + key.replace('wf_timekeeper_', '') + '"]').next('.timeKeeper-time').text(msToTime(timeDiff))
                 }
             });
-	    }
-	    updater();
-        setInterval(function() { updater(); }, 1000);
+        }
+        updater();
+        setInterval(function() {
+            updater();
+        }, 1000);
     }
 
     function ia(arr, ent) {
         return jQuery.inArray(ent, arr);
     }
-    
-    function reorderMenu(orderedArray) {
-	    var items = [];
-	    $('#custmenu li').each(function(){
-		    var t = $(this);
-		    var it = {
-			    name: t.data('mo'),
-			    html: '<li data-mo="'+t.data('mo')+'">'+t.html()+'</li>'
-		    }
-		    items.push(it)
-	    });
-	    $('#custmenu').empty();
-	    $.each(orderedArray, function(key, val){
-		    var result = $.grep(items, function(e){ return e.name == val.name; });
-		    $('#custmenu').append(result[0].html);
-		    $('#custmenu').find('li:first').addClass('active')
-	    }); 
-	}
-	
-	function isPast(date, output) {
-		if(date != null && date.length){
-			var selectedDate = new Date(date.replace('T', ' '));
-			var now = new Date();
-			if (selectedDate < now) {
-				return output[0] || true;
-			}else{
-				return output[1];
-			}
-		}else{
-			return date;
-		}
-	}
-	
-	$.fn.focusToEnd = function() {
-	   return this.each(function() {
-	       var v = $(this).val();
-	       $(this).focus().val("").val(v);
-	   });
-	};
 
-    var wf = {
-        myprojectsarray: [],
-        get: function(api, fn) {
-            if (!wfgetdatacache(api)) {
-                var wfdatacacheInt = setInterval(function() {
-                    wfdatacacheTimer++;
-                }, 1000);
-                $.getJSON("https://" + storage.wfdomain + ".attask-ondemand.com/attask/api/v"+apiVersion+"/" + api, function(data) {
-                    jQuery.isFunction(fn) ? fn(data) : false
-                    wfdatacache(data, api, wfdatacacheInt);
-                }).error(function() {
-                    swal({
-                        title: "Sync Error",
-                        text: "Could not connect to Workfront servers. (make sure you are loggeed in)",
-                        type: "warning",
-                        showCancelButton: false,
-                        confirmButtonClass: "btn-danger swal-red",
-                        confirmButtonText: "close",
-                        closeOnConfirm: false
-                    });
-                });
+    function reorderMenu(orderedArray) {
+        var items = [];
+        $('#custmenu li').each(function() {
+            var t = $(this);
+            var it = {
+                name: t.data('mo'),
+                html: '<li data-mo="' + t.data('mo') + '">' + t.html() + '</li>'
+            }
+            items.push(it)
+        });
+        $('#custmenu').empty();
+        $.each(orderedArray, function(key, val) {
+            var result = $.grep(items, function(e) {
+                return e.name == val.name;
+            });
+            $('#custmenu').append(result[0].html);
+            $('#custmenu').find('li:first').addClass('active')
+        });
+    }
+
+    function isPast(date, output) {
+        if (date != null && date.length) {
+            var selectedDate = new Date(date.replace('T', ' '));
+            var now = new Date();
+            if (selectedDate < now) {
+                return output[0] || true;
             } else {
-                jQuery.isFunction(fn) ? fn(wfgetdatacache(api)) : false
+                return output[1];
             }
-        },
-        tasks: function(api, fn) {
-            this.get('task/' + api, function() {
-                fn()
-            });
-        },
-        time: function(taskID, time, kind) {
-            if (kind == "task") {
-                kind == 'taskID';
-            }
-            if (kind == "project") {
-                kind == 'projectID';
-            }
-            if (kind == "Issue") {
-                kind == 'opTaskID';
-            }
-            wf.get('hour/?updates={"' + kind + '":"' + taskID + '","hours":"' + time + '","status":"SUB"}&sessionID=' + storage.sessionID + '&method=post', function() {
-                swal("Done", "Your time has been logged", "success");
-            });
-        },
-        actionBar: function(act) {
-            var bar = "";
-            bar += (ia(act, 'link')) ? "" : "";
-            return bar;
-        },
-        remove: function(that, id, fn){
-	        that.animate({ 
-		        left:-500 
-		    }, 500, function(){
-			    setTimeout(function(){
-				    fn(that, id, function(){
-					    that.remove();
-				    });
-			    }, 500);
-		    });
+        } else {
+            return date;
         }
     }
-    //https://pcci.attask-ondemand.com/attask/api/v5.0/task/5720c4e6001455d0cf63cd8256a9e048?fields=*
+
+    $.fn.focusToEnd = function() {
+        return this.each(function() {
+            var v = $(this).val();
+            $(this).focus().val("").val(v);
+        });
+    };
+
+    var wf = {
+            myprojectsarray: [],
+            get: function(api, fn) {
+                if (!wfgetdatacache(api)) {
+                    var wfdatacacheInt = setInterval(function() {
+                        wfdatacacheTimer++;
+                    }, 1000);
+                    $.getJSON("https://" + storage.wfdomain + ".attask-ondemand.com/attask/api/v" + apiVersion + "/" + api, function(data) {
+                        jQuery.isFunction(fn) ? fn(data) : false
+                        wfdatacache(data, api, wfdatacacheInt);
+                    }).error(function() {
+                        swal({
+                            title: "Sync Error",
+                            text: "Could not connect to Workfront servers. (make sure you are loggeed in)",
+                            type: "warning",
+                            showCancelButton: false,
+                            confirmButtonClass: "btn-danger swal-red",
+                            confirmButtonText: "close",
+                            closeOnConfirm: false
+                        });
+                    });
+                } else {
+                    jQuery.isFunction(fn) ? fn(wfgetdatacache(api)) : false
+                }
+            },
+            tasks: function(api, fn) {
+                this.get('task/' + api, function() {
+                    fn()
+                });
+            },
+            time: function(taskID, time, kind) {
+                if (kind == "task") {
+                    kind == 'taskID';
+                }
+                if (kind == "project") {
+                    kind == 'projectID';
+                }
+                if (kind == "Issue") {
+                    kind == 'opTaskID';
+                }
+                wf.get('hour/?updates={"' + kind + '":"' + taskID + '","hours":"' + time + '","status":"SUB"}&sessionID=' + storage.sessionID + '&method=post', function() {
+                    swal("Done", "Your time has been logged", "success");
+                });
+            },
+            actionBar: function(act) {
+                var bar = "";
+                bar += (ia(act, 'link')) ? "" : "";
+                return bar;
+            },
+            remove: function(that, id, fn) {
+                that.animate({
+                    left: -500
+                }, 500, function() {
+                    setTimeout(function() {
+                        fn(that, id, function() {
+                            that.remove();
+                        });
+                    }, 500);
+                });
+            }
+        }
+        //https://pcci.attask-ondemand.com/attask/api/v5.0/task/5720c4e6001455d0cf63cd8256a9e048?fields=*
     var populate = {
         mywork: function(fn, print) {
             var wfcontent = $('#wfcontent');
@@ -286,20 +294,20 @@ chrome.storage.sync.get(null, function(storage) {
                     key: 'projectID',
                     string: true
                 }, true));
-                for (var i = 0; i < sorted.length-1; i++) {
+                for (var i = 0; i < sorted.length - 1; i++) {
                     if (!print) {
                         var task = sorted[i];
                         var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
                         var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                         var pbar = progressBar(task.percentComplete);
                         var doneTip = (task.hasOwnProperty('assignmentsListString') && task.assignmentsListString.indexOf(",") > -1) ? 'data-toggle="popover" data-content=""' : '';
-                        var bgColor = ( storage.hasOwnProperty(task.projectID) ) ? storage[task.projectID].bgColor : "#eeeeee";
-                        var html = '<div class="wf-list-item '+datClass+'" data-obj-code="'+task.objCode+'" data-type="task" data-project="' + task.projectID + '" data-task="' + task.ID + '">' +
+                        var bgColor = (storage.hasOwnProperty(task.projectID)) ? storage[task.projectID].bgColor : "#eeeeee";
+                        var html = '<div class="wf-list-item ' + datClass + '" data-obj-code="' + task.objCode + '" data-type="task" data-project="' + task.projectID + '" data-task="' + task.ID + '">' +
                             '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
-                            '<button class="wf-btn wf-btn-done item-bgColor" '+doneTip+'><i class="zmdi zmdi-square-o"></i> Done</button>'+
+                            '<button class="wf-btn wf-btn-done item-bgColor" ' + doneTip + '><i class="zmdi zmdi-square-o"></i> Done</button>' +
                             '<div class="wf-item-icons">' +
                             '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/task/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
-                            '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+bgColor+'"></i>' +
+                            '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="' + bgColor + '"></i>' +
                             '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
                             '<div class="tabConfirm"></div>' +
                             '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
@@ -322,7 +330,7 @@ chrome.storage.sync.get(null, function(storage) {
         projects: function(fn) {
             var wfcontent = $('#wfcontent');
             wfcontent.empty();
-            wf.get('project/search?projectUserIDs='+storage.userID+'&status=CUR&fields=percentComplete,plannedCompletionDate', function(data) {
+            wf.get('project/search?projectUserIDs=' + storage.userID + '&status=CUR&fields=percentComplete,plannedCompletionDate', function(data) {
                 var sorted = data.data.sort(srt({
                     key: 'plannedCompletionDate',
                     string: true
@@ -332,12 +340,12 @@ chrome.storage.sync.get(null, function(storage) {
                     var datClass = isPast(task.plannedCompletionDate, ['date-pasted', 'date-good', 'date-faraway']);
                     var dueON = $.format.date(task.plannedCompletionDate, "MMMM d, yyyy");
                     var pbar = progressBar(task.percentComplete);
-                    var bgColor = ( storage.hasOwnProperty(task.ID) ) ? storage[task.ID].bgColor : "#eeeeee";
-                    var html = '<div class="wf-list-item '+datClass+'" data-type="project" data-project="' + task.ID + '">' +
+                    var bgColor = (storage.hasOwnProperty(task.ID)) ? storage[task.ID].bgColor : "#eeeeee";
+                    var html = '<div class="wf-list-item ' + datClass + '" data-type="project" data-project="' + task.ID + '">' +
                         '<strong>' + task.name + '</strong><span class="wf-list-item-date">Due: ' + dueON + '</span>' + pbar +
                         '<br /><div class="wf-item-icons">' +
                         '<a target="_blank" href="https://' + storage.wfdomain + '.attask-ondemand.com/project/view?ID=' + task.ID + '"><i class="zmdi zmdi-open-in-browser"></i></a>' +
-                        '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="'+bgColor+'"></i>' +
+                        '<i class="zmdi zmdi-format-color-fill PJColorPicker" data-color="' + bgColor + '"></i>' +
                         '<i class="zmdi zmdi-time timeKeeper" data-timekeeper="' + task.ID + '"></i><span class="timeKeeper-time"></span>' +
                         '<div class="tabConfirm"></div>' +
                         '<span class="wf-list-item-details-btn"><i class="zmdi zmdi-more" aria-hidden="true"></i></span>' +
@@ -437,13 +445,15 @@ chrome.storage.sync.get(null, function(storage) {
             preffForm.find('[name="refreshrate"]').val(storage.refreshrate || 60000);
 
             $('#resetConfig').on('click', function() {
-				var toRemove = [];
-				chrome.storage.sync.get( function(Items) {
-				    $.each(Items, function(index, value){ toRemove.push(index); });
-				    chrome.storage.sync.remove(toRemove, function(Items) {
-				        window.location = "welcome.html";
-				    }); 
-				});
+                var toRemove = [];
+                chrome.storage.sync.get(function(Items) {
+                    $.each(Items, function(index, value) {
+                        toRemove.push(index);
+                    });
+                    chrome.storage.sync.remove(toRemove, function(Items) {
+                        window.location = "welcome.html";
+                    });
+                });
             });
 
             $("input[type='checkbox']").bootstrapSwitch({
@@ -470,115 +480,114 @@ chrome.storage.sync.get(null, function(storage) {
             });
         }
         if (thispage() == "do.html") {
-	        $('textarea').focusToEnd()
-	    }
-        
+            $('textarea').focusToEnd()
+        }
+
     }
-    
-    function hasToReload(){
-	    //Color Pickers
-	    $('.PJColorPicker').each(function(){
+
+    function hasToReload() {
+        //Color Pickers
+        $('.PJColorPicker').each(function() {
             var that = $(this);
             var id = that.closest('.wf-list-item').data('project');
             var color = that.data('color') || "#eeeeee";
             that.colorpicker({
                 color: color
             }).on('changeColor', function(e) {
-	            chrome.storage.sync.set({
-                	[id]: { bgColor: e.color.toHex() }
+                chrome.storage.sync.set({
+                    [id]: {
+                        bgColor: e.color.toHex()
+                    }
                 });
                 apply_settings(id);
-	        });
+            });
         });
         checkTimeInProgress();
         $('.wf-btn-done[data-toggle="popover"]').popover({
-	        html : true, 
-			content: function() {
-	        	return $('#wfdonePopover').html();
-			}
-	    });
-	    $('body').on('click', function (e) {
-		    $('[data-toggle="popover"]').each(function () {
-		        if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-		            $(this).popover('hide');
-		        }
-		    });
-		});
-    }
-    
-    function extendedItem(parnet){
-	    var this_id = parnet.find('.timeKeeper').attr('data-timekeeper');
-	    console.log(this_id)
-	    parnet.append('<div class="wf-item-extended-content"></div>');
-		var ext = parnet.find('.wf-item-extended-content');
-		var form = '<ul class="wf-item-extended-menu"><li data-un="0%" data-pos="0" class="active">Updates</li><li data-un="-100%" data-pos="1">Documents</li><li data-un="-200%" data-pos="2">Details</li></ul>';
-		var extention = form+'<div class="wf-extended-slider"><ul>';
-		
-			extention += '<li data-pos="0"><div class="wf-item-extended-form">'+
-							'<textarea name="wf-update-text"></textarea>'+
-							'<select name="wf-update-status">'+
-								'<option>Going Smoothly</option>'+
-								'<option>Some Concerns</option>'+
-								'<option>Major Roadblocks</option>'+
-							'</select>'+
-							'<select name="wf-update-state">'+
-								'<option>New</option>'+
-								'<option>In Progress</option>'+
-								'<option>Checking</option>'+
-								'<option>Pending IT Support</option>'+
-								'<option>Waiting For</option>'+
-								'<option>Complete Pending Approval</option>'+
-							'</select>'+
-							'<button name="update-txt" class="wf-btn wf-btn-blue wf-btn-tad-bigger">Update</button><br />'+
-						'</div></li>';
-						
-			extention += '<li data-pos="1"><div class="wf-item-extended-form wf-item-extended-overflow">'+
-							'<div class="wf-item-extended-document">Document Name</div>'+
-							'<div class="wf-item-extended-document">Document Name</div>'+
-						'</div></li>';
-						
-			extention += '<li data-pos="2"><div class="wf-item-extended-form wf-item-extended-overflow">'+
-							'<div class="wf-item-extended-para">Blah Blah Blah, Blah Blah, Blah Blah Blah Blah Blah</div>'+
-						'</div></li>';
-		
-		extention += '</ul></div>';
-		
-		
-		ext.append(extention);
-		jQuery(document).ready(function($) {
-			$('.wf-extended-slider').unslider({
-				nav: false,
-				arrows: false
-			});
-			$('body').on('click', '.wf-item-extended-menu li', function(){
-				var move = $(this).data('un');
-				var pos = $(this).data('pos');
-				$('.wf-item-extended-menu li').removeClass('active');
-				$(this).addClass('active');
-				$('.unslider-carousel').find('.unslider-active').removeClass('unslider-active');
-				$('.unslider-carousel').find('li[data-pos="'+pos+'"]').addClass('unslider-active');
-				$('.unslider-carousel').animate({
-					left: move
-				}, 300);
-			});
-		});
+            html: true,
+            content: function() {
+                return $('#wfdonePopover').html();
+            }
+        });
+        $('body').on('click', function(e) {
+            $('[data-toggle="popover"]').each(function() {
+                if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                    $(this).popover('hide');
+                }
+            });
+        });
     }
 
+    function extendedItem(parnet) {
+        var this_id = parnet.find('.timeKeeper').attr('data-timekeeper');
+        console.log(this_id)
+        parnet.append('<div class="wf-item-extended-content"></div>');
+        var ext = parnet.find('.wf-item-extended-content');
+        var form = '<ul class="wf-item-extended-menu"><li data-un="0%" data-pos="0" class="active">Updates</li><li data-un="-100%" data-pos="1">Documents</li><li data-un="-200%" data-pos="2">Details</li></ul>';
+        var extention = form + '<div class="wf-extended-slider"><ul>';
+
+        extention += '<li data-pos="0"><div class="wf-item-extended-form">' +
+            '<textarea name="wf-update-text"></textarea>' +
+            '<select name="wf-update-status">' +
+            '<option>Going Smoothly</option>' +
+            '<option>Some Concerns</option>' +
+            '<option>Major Roadblocks</option>' +
+            '</select>' +
+            '<select name="wf-update-state">' +
+            '<option>New</option>' +
+            '<option>In Progress</option>' +
+            '<option>Checking</option>' +
+            '<option>Pending IT Support</option>' +
+            '<option>Waiting For</option>' +
+            '<option>Complete Pending Approval</option>' +
+            '</select>' +
+            '<button name="update-txt" class="wf-btn wf-btn-blue wf-btn-tad-bigger">Update</button><br />' +
+            '</div></li>';
+
+        extention += '<li data-pos="1"><div class="wf-item-extended-form wf-item-extended-overflow">' +
+            '<div class="wf-item-extended-document">Document Name</div>' +
+            '<div class="wf-item-extended-document">Document Name</div>' +
+            '</div></li>';
+
+        extention += '<li data-pos="2"><div class="wf-item-extended-form wf-item-extended-overflow">' +
+            '<div class="wf-item-extended-para">Blah Blah Blah, Blah Blah, Blah Blah Blah Blah Blah</div>' +
+            '</div></li>';
+
+        extention += '</ul></div>';
+
+        ext.append(extention);
+        jQuery(document).ready(function($) {
+            $('.wf-extended-slider').unslider({
+                nav: false,
+                arrows: false
+            });
+            $('body').on('click', '.wf-item-extended-menu li', function() {
+                var move = $(this).data('un');
+                var pos = $(this).data('pos');
+                $('.wf-item-extended-menu li').removeClass('active');
+                $(this).addClass('active');
+                $('.unslider-carousel').find('.unslider-active').removeClass('unslider-active');
+                $('.unslider-carousel').find('li[data-pos="' + pos + '"]').addClass('unslider-active');
+                $('.unslider-carousel').animate({
+                    left: move
+                }, 300);
+            });
+        });
+    }
 
     $(document).ready(function() {
-
         if (!storage.isConfiged) {
             window.location = "welcome.html";
         } else {
-	        var ajaxStartLoader;
+            var ajaxStartLoader;
             $(document).ajaxStart(function() {
                 $('#pageloading').show();
-                ajaxStartLoader = setTimeout(function() { 
-	            	$('#pageloading').hide();
-	            	window.location = "err.html?e=ajaxTimeout";
-	            }, storage.timeout || 10000); 
+                ajaxStartLoader = setTimeout(function() {
+                    $('#pageloading').hide();
+                    window.location = "err.html?e=ajaxTimeout";
+                }, storage.timeout || 10000);
             }).ajaxStop(function() {
-	            clearTimeout(ajaxStartLoader)
+                clearTimeout(ajaxStartLoader)
                 $('#pageloading').hide();
             });
 
@@ -587,30 +596,42 @@ chrome.storage.sync.get(null, function(storage) {
                 populate[dft](function() {
                     hasToReload();
                 });
-                storage.MenuOrder = (storage.MenuOrder) ? storage.MenuOrder : [{ name:"Projects",html:'<li data-mo="Projects"><a href="#"data-load="projects"><span>Projects</span></a></li>' },{ name:"My Work",html:'<li data-mo="My Work"><a href="#"data-load="mywork"><span>MyWork</span></a></li>' },{ name:"Approvals",html:'<li data-mo="Approvals"><a href="#"data-load="approvals"><span>Approvals</span></a></li>' },{ name:"Notifications",html:'<li data-mo="Notifications"><a href="#"data-load="notifications"><iclass="zmdi zmdi-notifications"></i></a></li>' }];
+                storage.MenuOrder = (storage.MenuOrder) ? storage.MenuOrder : [{
+                    name: "Projects",
+                    html: '<li data-mo="Projects"><a href="#"data-load="projects"><span>Projects</span></a></li>'
+                }, {
+                    name: "My Work",
+                    html: '<li data-mo="My Work"><a href="#"data-load="mywork"><span>MyWork</span></a></li>'
+                }, {
+                    name: "Approvals",
+                    html: '<li data-mo="Approvals"><a href="#"data-load="approvals"><span>Approvals</span></a></li>'
+                }, {
+                    name: "Notifications",
+                    html: '<li data-mo="Notifications"><a href="#"data-load="notifications"><iclass="zmdi zmdi-notifications"></i></a></li>'
+                }];
                 reorderMenu(storage.MenuOrder);
-                
-				$('body').on('click', '[data-done]', function(){
-					wf.remove($(this).closest('.wf-list-item'), $(this).data('done'), function(that, ac, remove){
-						remove();
-					});
-				});
-				
-				$('body').on('click', '.wf-list-item-details-btn', function(){
-					var parnet = $(this).closest('.wf-list-item');
-					parnet.toggleClass('wf-list-item-extended');
-					if(parnet.find('.wf-item-extended-content').length > 0){
-						parnet.find('.wf-item-extended-content').remove();
-					}else{
-						extendedItem(parnet);
-						$('select').selectpicker();
-					}
-				});
+
+                $('body').on('click', '[data-done]', function() {
+                    wf.remove($(this).closest('.wf-list-item'), $(this).data('done'), function(that, ac, remove) {
+                        remove();
+                    });
+                });
+
+                $('body').on('click', '.wf-list-item-details-btn', function() {
+                    var parnet = $(this).closest('.wf-list-item');
+                    parnet.toggleClass('wf-list-item-extended');
+                    if (parnet.find('.wf-item-extended-content').length > 0) {
+                        parnet.find('.wf-item-extended-content').remove();
+                    } else {
+                        extendedItem(parnet);
+                        $('select').selectpicker();
+                    }
+                });
 
             }
 
             $('[data-load]').on('click', function() {
-	            $('#wfcontent').empty();
+                $('#wfcontent').empty();
                 $('[data-load]').parent().removeClass('active');
                 $(this).parent().addClass('active');
                 var apac = $(this).data('load');
@@ -618,70 +639,84 @@ chrome.storage.sync.get(null, function(storage) {
                     hasToReload();
                 });
             });
-            
-			$('#finder').keyup(function(e){
-			    var query = $.trim($(this).val()).toLowerCase();
-			    if(query=="do()"){ window.location = "do.html"; }
-			    $('.wf-list-item').each(function(){
-			         var $this = $(this);
-			         var con = $this.text().toLowerCase();
-			         if (con.match("^$")) {
-					   shortCodeSearch(con)
-					 }
-			         if(con.indexOf(query) === -1)
-			             $this.fadeOut();
-			        else $this.fadeIn();
-			    });
-			}).on('focus', function(){
-				$('#wfsearch-add').show();
-			}).on('blur', function(){
-				if(this.value.length===0){
-					$('#wfsearch-add').hide();
-				}
-			});
-			
-			$('#wfsearch-favs').on('click', function(event){
-				var btn = $(this);
-				btn.find('ul').toggle();
-				btn.toggleClass('focus');
-				$('#finder').val( (event.target.nodeName=="LI") ? $(event.target).text() : "" ).trigger('keyup');
-			});
-			
-			
-			var searchMarks = (localStorage.getItem('searchMarks')) ? localStorage.getItem('searchMarks').split(',') : [];
-			console.log(searchMarks)
-			function searchMarksPrep(){
-				if(searchMarks.length>0){
-					$.each(searchMarks, function(key, val){
-						$('#wfsearch-favs').find('ul').append('<li>'+val+'</li>');
-					});
-				}
-			}
-			searchMarksPrep()
-			$('#wfsearch-add').on('click', function(event){
-				searchMarks.push( $('#finder').val() );
-				localStorage.setItem('searchMarks', searchMarks);
-				searchMarksPrep()
-			});
-            
+
+            $('#finder').keyup(function(e) {
+                var query = $.trim($(this).val()).toLowerCase();
+                if (query == "do()") {
+                    window.location = "do.html";
+                }
+                $('.wf-list-item').each(function() {
+                    var $this = $(this);
+                    var con = $this.text().toLowerCase();
+                    if (con.match("^$")) {
+                        shortCodeSearch(con)
+                    }
+                    if (con.indexOf(query) === -1)
+                        $this.fadeOut();
+                    else $this.fadeIn();
+                });
+            }).on('focus', function() {
+                $('#wfsearch-add').show();
+            }).on('blur', function() {
+                if (this.value.length === 0) {
+                    $('#wfsearch-add').hide();
+                }
+            });
+
+            var searchMarks = (localStorage.getItem('searchMarks')) ? localStorage.getItem('searchMarks').split(',') : [];
+            $('#wfsearch-favs').on('click', function(event) {
+                var btn = $(this);
+                btn.find('ul').toggle();
+                btn.toggleClass('focus');
+                var deletethis = function() {
+                        if (event.target.nodeName == "EM") {
+                            var t = $(event.target).parent().text();
+                            $(event.target).parent().remove()
+                            searchMarks = jQuery.grep(searchMarks, function(value) {
+                                return value != t;
+                            });
+                            localStorage.setItem('searchMarks', searchMarks);
+                        }
+                    }
+                    (event.target.nodeName == "EM") ? deletethis() : false;
+                $('#finder').val((event.target.nodeName == "LI") ? $(event.target).text() : "").trigger('keyup')
+            });
+
+            function searchMarksPrep() {
+                if (searchMarks.length > 0) {
+                    searchMarks = searchMarks.sort();
+                    $('#wfsearch-favs').find('ul').empty();
+                    $.each(searchMarks, function(key, val) {
+                        $('#wfsearch-favs').find('ul').append('<li>' + val + '<em class="zmdi zmdi-close"></em></li>');
+                    });
+                }
+            }
+            searchMarksPrep()
+            $('#wfsearch-add').on('click', function(event) {
+                searchMarks.push($('#finder').val());
+                localStorage.setItem('searchMarks', searchMarks);
+                searchMarksPrep()
+                $(this).hide();
+            });
+
         } //Is isConfiged
         pageActions();
         $('.navbar').dblclick(function() {
             swal({
-	            title: "New Window?",   
-	            text: "Do you want to open this in a new window?",   
-	            type: "info",   
-	            showCancelButton: true,     
-	            confirmButtonText: "Yes",   
-	            cancelButtonText: "Cancel",   
-	            closeOnConfirm: true,   
-	            closeOnCancel: true 
-	        },function(isConfirm){ 
-		        if (isConfirm) { 
-					var sw = screen.width - 530;
-			        window.open('popup.html', 'Quick Front', 'width=500, height=601, top=75, left=' + sw);  
-			    }
-			});
+                title: "New Window?",
+                text: "Do you want to open this in a new window?",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: true,
+                closeOnCancel: true
+            }, function(isConfirm) {
+                if (isConfirm) {
+                    var sw = screen.width - 530;
+                    window.open('popup.html', 'Quick Front', 'width=500, height=601, top=75, left=' + sw);
+                }
+            });
             return false;
         });
     });

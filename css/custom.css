@@ -511,15 +511,54 @@ ol.MenuOrder li.placeholder:before {
 	display: none;
     position: absolute;
     list-style: none;
-    min-width: 200px;
+    width: 200px;
     background: white;
-    left: -177px;
+    left: -175px;
+    top: 28px;
     z-index: 9;
     border: 1px solid #a1a1a1;
     border-radius: 7px;
     margin: 0px;
     padding: 5px;
+
+	background: #FFFFFF;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	border: #a1a1a1 solid 1px;
+    -webkit-box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
+
+#wfsearch button ul:before 
+{
+	content: '';
+    position: absolute;
+    border-style: solid;
+    border-width: 0 10px 9px;
+    border-color: #a1a1a1 transparent;
+    display: block;
+    width: 0;
+    z-index: 0;
+    top: -10px;
+    left: 173px;
+}
+
+#wfsearch button ul:after 
+{
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 0 10px 9px;
+	border-color: #FFFFFF transparent;
+	display: block;
+	width: 0;
+	z-index: 1;
+	top: -9px;
+    left: 173px;
+}
+
+
 
 #wfsearch button ul > li{
 	width: 100%;
@@ -533,9 +572,18 @@ ol.MenuOrder li.placeholder:before {
 	cursor: pointer;
 }
 
+#wfsearch button ul > li em{
+	float: right;
+	opacity: 0;
+}
+
+#wfsearch button ul > li:hover em{
+	opacity: 1;
+}
+
 .wf-btn-group{
 	position: absolute;
-    right: 10px;
+    right: 15px;
     top: 8px;
     background: white;
 }
