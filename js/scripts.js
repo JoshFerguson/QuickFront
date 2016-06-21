@@ -460,6 +460,10 @@ chrome.storage.sync.get(null, function(storage) {
                 size: 'mini'
             });
 
+			$.getJSON( "../manifest.json", function( json ) {
+				$('#version b').text(json.version);
+			});
+
             if (storage.MenuOrder) {
                 $("ol.MenuOrder").empty();
                 $.each(storage.MenuOrder, function(key, val) {
